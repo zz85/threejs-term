@@ -1,3 +1,8 @@
+// Doesn't work yet
+// Usage:
+// FakeCanvas = require('./FakeCanvas')
+// canvas = new FakeCanvas();
+
 class FakeCanvas {
     constructor() {
         this.style = {};
