@@ -1,12 +1,8 @@
 THREE = require('three')
-// jsdom = require('jsdom');
 Canvas = require('canvas');
 
 let width = 1640;
 let height = 1480;
-
-// document = jsdom.jsdom();
-// canvas = document.createElement('canvas');
 
 canvas = new Canvas()
 canvas.width = width;

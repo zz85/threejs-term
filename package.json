@@ -5,7 +5,6 @@
   "license": "MIT",
   "dependencies": {
     "canvas": "^1.6.1",
-    "jsdom": "^9.8.3",
     "three": "^0.82.1"
   }
 }
