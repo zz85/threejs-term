@@ -2,8 +2,8 @@ THREE = require('three')
 // jsdom = require('jsdom');
 Canvas = require('canvas');
 
-let width = 640;
-let height = 480;
+let width = 1640;
+let height = 1480;
 
 // document = jsdom.jsdom();
 // canvas = document.createElement('canvas');
@@ -35,21 +35,26 @@ plane.position.y = - 200;
 plane.rotation.x = - Math.PI / 2;
 scene.add( plane );
 
-
-
 const camera = new THREE.PerspectiveCamera( 70, width / height, 1, 1000 );
 camera.position.y = 150;
 camera.position.z = 500;
 
-renderer = new THREE.SoftwareRenderer({
+const params = {
     canvas: canvas, // fake
-});
-
-// renderer = new THREE.CanvasRenderer();
+};
+canvas.style = {};
+// renderer = new THREE.SoftwareRenderer(params);
+renderer = new THREE.CanvasRenderer(params);
 renderer.setClearColor( 0xf0f0f0 );
 renderer.setSize( width, height );
 
 renderer.render(scene, camera);
+
+setInterval( () => {
+    console.time('render');
+    renderer.render(scene, camera);
+    console.timeEnd('render');
+})
 
 console.log(canvas);
 
