@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "blessed": "^0.1.81",
     "canvas": "^1.6.1",
     "three": "^0.82.1"
   }
