@@ -18,7 +18,7 @@ const fs = require('fs');
  */
 
 let y_scale = 2;
-let rendering_scale = 0.25;
+let rendering_scale = 0.1;
 let width = 640 * rendering_scale;
 let height = 480 * rendering_scale;
 
@@ -41,8 +41,6 @@ function resize(w, h) {
 	height = h;
 	camera.aspect = w / h;
 	camera.updateProjectionMatrix();
-	canvas.width = w;
-	canvas.height = h;
 	renderer.setSize(w, h);
 }
 
@@ -133,37 +131,22 @@ screen.on('resize', function(e) {
 });
 
 screen.program.on('resize', e => {
-	console.error('resize', screen.program.columns,
-	screen.program.rows);
+	log(`Resized ${screen.program.columns}, ${screen.program.rows}`);
+	get_window_pixels();
 });
 
-// screen.program.getWindowSize((e, res) => {
-// 	console.error('window size', e);
-// 	/*
-// 	{ event: 'window-manipulation',
-// 		code: '',
-// 		type: 'textarea-size',
-// 		size: { height: 44, width: 127 },
-// 		height: 44,
-// 		width: 127,
-// 		textAreaSizeCharacters: { height: 44, width: 127 } }
-// 	*/
-// })
-
-screen.program.manipulateWindow(14, (e, res) => {
+get_window_pixels = _ => screen.program.manipulateWindow(14, (e, res) => {
 	console.error('pixel size', res);
-	const fontWidth = res.width
-		/ screen.width;
-	const fontHeight = res.height
-		/ screen.height;
-
+	const fontWidth = res.width / screen.width;
+	const fontHeight = res.height / screen.height;
 	y_scale = fontHeight / fontWidth;
-	console.error('font', fontWidth, fontHeight, y_scale);
+	log(`Estimated font size ${fontWidth.toFixed(3)}x${fontHeight.toFixed(3)}, scale ${y_scale.toFixed(3)}`);
 
 	width = res.width * rendering_scale | 0;
 	height = res.height * rendering_scale | 0;
-	console.error('using ', width, height);
+	log(`Rendering using ${width}x${height}px`);
 	resize(width, height);
+
 	/*
 	{ event: 'window-manipulation',
 		code: '',
@@ -185,17 +168,14 @@ function render() {
 const start = Date.now();
 
 setInterval( () => {
-	// log(screen.width, screen.height);
-	// resize(screen.width, screen.height * y_scale);
 	const start = Date.now()
 	render();
 	renderer.render(scene, camera);
 	icon.setImage(canvas.toBuffer())
 	screen.render();
-	// saveCanvas();
+	saveCanvas();
 	const done = Date.now()
-	log('Time took', done - start);
-	// console.timeEnd('render');
+	// log('Render time took', done - start);
 }, 30)
 
 function log(...args) {
@@ -207,3 +187,6 @@ function log(...args) {
 function clearlog() {
 	box.setContent('{bold}Logs{/bold}\n');
 }
+
+resize(screen.width, screen.height * y_scale);
+get_window_pixels();
