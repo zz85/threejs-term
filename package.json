@@ -1,0 +1,11 @@
+{
+  "name": "three-blessed",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "canvas": "^1.6.1",
+    "jsdom": "^9.8.3",
+    "three": "^0.82.1"
+  }
+}
