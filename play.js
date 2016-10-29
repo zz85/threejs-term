@@ -17,14 +17,15 @@ const fs = require('fs');
  *  examples/canvas_ascii_effect.html
  */
 
-let width = 640 * 0.25;
-let height = 480 * 0.25;
+let y_scale = 2;
+let rendering_scale = 0.25;
+let width = 640 * rendering_scale;
+let height = 480 * rendering_scale;
+
 
 // Set up fake canvas
 canvas = new Canvas()
 canvas.style = {};
-const y_scale = 1;
-
 const { scene } = require('./scene');
 
 const camera = new THREE.PerspectiveCamera( 70, width / height, 1, 1000 );
@@ -40,6 +41,8 @@ function resize(w, h) {
 	height = h;
 	camera.aspect = w / h;
 	camera.updateProjectionMatrix();
+	canvas.width = w;
+	canvas.height = h;
 	renderer.setSize(w, h);
 }
 
@@ -51,7 +54,7 @@ renderer.render(scene, camera);
 
 function saveCanvas() {
 	// Write canvas to file
-	const out = fs.createWriteStream("./test-out3.png");
+	const out = fs.createWriteStream("./test-out4.png");
 	const canvasStream = canvas.pngStream().pipe(out);
 }
 
@@ -115,13 +118,61 @@ box.on('click', clearlog);
 // Render the screen.
 screen.render();
 
-screen.on('resize', function(e) {
-	console.log(e);
-});
-
 screen.on('mousedown', function(e) {
 	// e.action === 'mousedown';
 	log('mouse', e.x, e.y, screen.width, screen.height);
+});
+
+screen.program.on('response', function(e) {
+	console.error('res', e);
+})
+
+// This doesn't seem to work so well, so use screen.program
+screen.on('resize', function(e) {
+	console.log('resizing', e);
+});
+
+screen.program.on('resize', e => {
+	console.error('resize', screen.program.columns,
+	screen.program.rows);
+});
+
+// screen.program.getWindowSize((e, res) => {
+// 	console.error('window size', e);
+// 	/*
+// 	{ event: 'window-manipulation',
+// 		code: '',
+// 		type: 'textarea-size',
+// 		size: { height: 44, width: 127 },
+// 		height: 44,
+// 		width: 127,
+// 		textAreaSizeCharacters: { height: 44, width: 127 } }
+// 	*/
+// })
+
+screen.program.manipulateWindow(14, (e, res) => {
+	console.error('pixel size', res);
+	const fontWidth = res.width
+		/ screen.width;
+	const fontHeight = res.height
+		/ screen.height;
+
+	y_scale = fontHeight / fontWidth;
+	console.error('font', fontWidth, fontHeight, y_scale);
+
+	width = res.width * rendering_scale | 0;
+	height = res.height * rendering_scale | 0;
+	console.error('using ', width, height);
+	resize(width, height);
+	/*
+	{ event: 'window-manipulation',
+		code: '',
+		type: 'window-size-pixels',
+		size: { height: 830, width: 1375 },
+		height: 830,
+		width: 1375,
+		windowSizePixels: { height: 830, width: 1375 } }
+	*/
 })
 
 function render() {
@@ -134,14 +185,16 @@ function render() {
 const start = Date.now();
 
 setInterval( () => {
-	resize(screen.width, screen.height * y_scale);
 	// log(screen.width, screen.height);
-	// console.time('render');
+	// resize(screen.width, screen.height * y_scale);
+	const start = Date.now()
 	render();
 	renderer.render(scene, camera);
 	icon.setImage(canvas.toBuffer())
 	screen.render();
-	saveCanvas();
+	// saveCanvas();
+	const done = Date.now()
+	log('Time took', done - start);
 	// console.timeEnd('render');
 }, 30)
 
