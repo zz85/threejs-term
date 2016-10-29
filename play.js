@@ -1,5 +1,9 @@
-THREE = require('three')
+THREE = require('three');
 Canvas = require('canvas');
+
+require('three/examples/js/renderers/Projector');
+require('three/examples/js/renderers/SoftwareRenderer');
+require('three/examples/js/renderers/CanvasRenderer');
 
 /*
  * Attempt to use three.js in node.js
@@ -14,15 +18,14 @@ Canvas = require('canvas');
 let width = 640 * 0.25;
 let height = 480 * 0.25;
 
+// Set up fake canvas
 canvas = new Canvas()
 canvas.width = width;
 canvas.height = height;
-ctx = canvas.getContext('2d');
-console.log(ctx);
+canvas.style = {}
 
-require('three/examples/js/renderers/Projector')
-require('three/examples/js/renderers/SoftwareRenderer')
-require('three/examples/js/renderers/CanvasRenderer')
+// FakeCanvas = require('./FakeCanvas')
+// canvas = new FakeCanvas();
 
 const { scene } = require('./scene');
 
@@ -34,7 +37,6 @@ const params = {
     canvas: canvas, // fake
 };
 
-canvas.style = {};
 // renderer = new THREE.SoftwareRenderer(params); // TODO pass in raw arrays and render that instead
 renderer = new THREE.CanvasRenderer(params);
 renderer.setClearColor( 0xf0f0f0 );
@@ -44,13 +46,12 @@ renderer.render(scene, camera);
 
 console.log(canvas);
 
+/*
+// Write canvas to file
 const fs = require('fs');
-var out = fs.createWriteStream("./test-out2.png");
-var canvasStream = canvas.pngStream();
-canvasStream.on("data", function (chunk) { out.write(chunk); });
-canvasStream.on("end", function() { console.log("done"); });
-
-// fs.writeFile('test-out.png', canvas.toBuffer());
+const out = fs.createWriteStream("./test-out3.png");
+const canvasStream = canvas.pngStream().pipe(out);
+*/
 
 var blessed = require('blessed');
 
@@ -59,14 +60,14 @@ var screen = blessed.screen({
   smartCSR: true
 });
 
-screen.title = 'my window title';
+screen.title = 'Three.js Terminal';
 
 // Create a box perfectly centered horizontally and vertically.
 var box = blessed.box({
   top: 'center',
   left: 'center',
-  width: '50%',
-  height: '50%',
+  width: '100%',
+  height: '100%',
   content: 'Hello {bold}world{/bold}!',
   tags: true,
   border: {
@@ -84,22 +85,15 @@ var box = blessed.box({
   }
 });
 
-// Append our box to the screen.
-screen.append(box);
-
-
 // Add a png icon to the box
 var icon = blessed.image({
-  parent: box,
+  parent: screen,
   top: 0,
   left: 0,
-  type: 'ansi', // 'overlay',
+  type: 'ansi',
   width: '100%',
   height: '100%',
-
-//   width: 'shrink',
-//   height: 'shrink',
-//   file: __dirname + '/test-out2.png',
+//   border: { type: 'line' },
   search: false
 });
 
@@ -120,7 +114,7 @@ screen.on('resize', function(e) {
 
 screen.on('mousedown', function(e) {
     // e.action === 'mousedown';
-    console.log('mouse', e, screen.width, screen.height);
+    console.log('mouse', e.x, e.y, screen.width, screen.height);
 })
 
 function render() {
@@ -136,7 +130,7 @@ setInterval( () => {
     console.time('render');
     render();
     renderer.render(scene, camera);
-    icon.setImage(canvas.toBuffer())
-    screen.render();
+    // icon.setImage(canvas.toBuffer())
+    // screen.render();
     console.timeEnd('render');
 }, 30)
