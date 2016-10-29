@@ -1,17 +1,18 @@
 THREE = require('three')
-jsdom = require('jsdom');
+// jsdom = require('jsdom');
+Canvas = require('canvas');
 
-document = jsdom.jsdom();
-canvas = document.createElement('canvas');
+let width = 640;
+let height = 480;
+
+// document = jsdom.jsdom();
+// canvas = document.createElement('canvas');
+
+canvas = new Canvas()
+canvas.width = width;
+canvas.height = height;
 ctx = canvas.getContext('2d');
 console.log(ctx);
-
-
-// document = {
-//     createElement: function(type) {
-//         console.log('haha mock');
-//     }
-// }
 
 require('three/examples/js/renderers/Projector')
 require('three/examples/js/renderers/SoftwareRenderer')
@@ -34,24 +35,28 @@ plane.position.y = - 200;
 plane.rotation.x = - Math.PI / 2;
 scene.add( plane );
 
-let width = 640;
-let height = 480;
+
 
 const camera = new THREE.PerspectiveCamera( 70, width / height, 1, 1000 );
 camera.position.y = 150;
 camera.position.z = 500;
 
-// renderer = new THREE.SoftwareRenderer({
-    // canvas: {}, // fake
-// });
+renderer = new THREE.SoftwareRenderer({
+    canvas: canvas, // fake
+});
 
-renderer = new THREE.CanvasRenderer();
+// renderer = new THREE.CanvasRenderer();
 renderer.setClearColor( 0xf0f0f0 );
 renderer.setSize( width, height );
 
 renderer.render(scene, camera);
 
-var out = fs.createWriteStream("./test-out.png");
+console.log(canvas);
+
+const fs = require('fs');
+var out = fs.createWriteStream("./test-out2.png");
 var canvasStream = canvas.pngStream();
 canvasStream.on("data", function (chunk) { out.write(chunk); });
-canvasStream.on("end", function () { console.log("done"); });
+canvasStream.on("end", function() { console.log("done"); });
+
+// fs.writeFile('test-out.png', canvas.toBuffer());
