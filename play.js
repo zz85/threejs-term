@@ -126,9 +126,6 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 box.focus();
 box.on('click', clearlog);
 
-// Render the screen.
-screen.render();
-
 screen.on('mousedown', function(e) {
 	// e.action === 'mousedown';
 	log('mouse', e.x, e.y, screen.width, screen.height);
@@ -179,13 +176,19 @@ function render() {
 	sphere.rotation.x = start * 0.0003;
 	sphere.rotation.z = start * 0.0002;
 
+	// Render
 	renderer.render(scene, camera);
-	icon.setImage(canvas.toBuffer())
+
+	// Render screen to terminal
+	icon.setImage(canvas.toBuffer());
 	screen.render();
-	saveCanvas();
+
+	// Save canvas
+	// saveCanvas();
 
 	const done = Date.now()
-	// log('Render time took', done - start);
+	log('Render time took', done - start);
+	frames ++;
 }
 
 const start = Date.now();
@@ -200,6 +203,20 @@ function clearlog() {
 	box.setContent('{bold}Logs{/bold}\n');
 }
 
+let last = Date.now,
+frames = 0;
+setInterval( () => {
+	const now = Date.now();
+	const fps = frames / (now - last) * 1000;
+	clearlog()
+	log('FPS: ' + fps.toFixed(2))
+	last = now;
+	frames = 0;
+}, 1000)
+
+
 resize(screen.width, screen.height * y_scale);
 get_window_pixels();
-setInterval(render, 1000 / 60);
+setInterval(render, 1);
+
+// 1000 / 60
