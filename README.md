@@ -8,8 +8,8 @@ Sysadmins can now run three.js in remote ssh sessions!
 ### Install and Running
 
 ```
-npm i -g threejs-term
-threejs-term
+$ npm i -g threejs-term # install and link binary
+$ threejs-term # runs the demo
 ```
 
 ### Features
@@ -31,12 +31,12 @@ Play with the [source](https://github.com/zz85/threejs-term/blob/master/play.js)
 
 Install dependencies
 ```
-yarn install # or npm install
+$ yarn install # or npm install
 ```
 
 Run
 ```
-node play.js
+$ node play.js
 ```
 
 It's tricky to debug blessed apps (since console.log's gonna messup the terminal),
@@ -44,8 +44,8 @@ so I'll pipe console.error messages to a log file and tail it elsewhere.
 log() helper function can also be used.
 
 ```
-node play.js 2>> logs.txt
-tail -f logs.txt
+$ node play.js 2>> logs.txt
+$ tail -f logs.txt
 ```
 
 ### Made by
