@@ -28,7 +28,7 @@ const fs = require('fs');
  */
 
 let y_scale = 2;
-let rendering_scale = 0.1;
+let rendering_scale = 0.15;
 let width = 640 * rendering_scale;
 let height = 480 * rendering_scale;
 
@@ -57,7 +57,7 @@ function resize(w, h) {
 
 // renderer = new THREE.SoftwareRenderer(params); // TODO pass in raw arrays and render that instead
 renderer = new THREE.CanvasRenderer(params);
-// renderer.setClearColor( 0xf0f0f0 );
+renderer.setClearColor( 0xf0f0f0 );
 renderer.render(scene, camera);
 
 function saveCanvas() {
@@ -87,7 +87,11 @@ var icon = blessed.image({
 	width: '100%',
 	height: '100%',
 	//   border: { type: 'line' },
-	search: false
+	search: false,
+	ascii: true,
+	optimization: 'cpu',
+	animate: false,
+	speed: 1000
 });
 
 
