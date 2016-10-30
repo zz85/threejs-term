@@ -1,7 +1,9 @@
-# Three.js on the Terminal
+# Three.js in the Terminal aka Three.js Terminal Renderer
 
 This is an example of how you can run three.js in your terminal.
 Sysadmins can now run three.js in remote ssh sessions!
+
+![threejs-term](https://cloud.githubusercontent.com/assets/314997/19834595/b96b3e84-9ea0-11e6-950b-5b3103969a9b.gif)
 
 ### Install and Running
 
