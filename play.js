@@ -16,7 +16,6 @@ const fs = require('fs');
  *
  * TODOs
  *  - optimize ascii conversion by pull from canvas data
- *  - add key controls too!
  *  - think of a good name for the project
  *  - add nice fps graphs
  *  - modularize This
@@ -30,12 +29,12 @@ const fs = require('fs');
  *  - convert to nice ascii effects
  *     (well blessed's ascii image did all the heavy lifting)
  *  - get mouse support for controls
+ *  - add key controls too!
  *
  * Also see,
- *  ascii_effect
+ *  https://threejs.org/examples/canvas_ascii_effect.html
  *  https://github.com/mrdoob/three.js/issues/7085
  *  https://github.com/mrdoob/three.js/issues/2182
- *  examples/canvas_ascii_effect.html
  */
 
 let y_scale = 2;
@@ -69,13 +68,12 @@ window = {
 	},
 
 	addEventListener(type, handler) {
+		// better make sure you emulate these events!
 		document.addEventListener(type, handler);
-		// console.error('implement me', type)
 	},
 
 	removeEventListener(type, handler) {
 		document.removeEventListener(type, handler);
-		// console.error('implement me', type)
 	}
 }
 controls = new THREE.TrackballControls( camera );
@@ -211,8 +209,8 @@ const keyToCode = {
 };
 
 // emulate keydown and keyup
-screen.key(['a', 's', 'd'], function(e) {
-// screen.on('keypress', function(e, f) {
+// screen.key(['a', 's', 'd'], function(e) {
+screen.on('keypress', function(e, f) {
 	if (keysDown[e]) {
 		clearTimeout(keysDown[e]);
 	} else {
@@ -280,8 +278,8 @@ function render() {
 	icon.setImage(canvas.toBuffer());
 	screen.render();
 
-	// Save canvas
-	saveCanvas();
+	// // Save canvas
+	// saveCanvas();
 
 	const done = Date.now()
 	// log('Render time took', done - start);
@@ -315,5 +313,3 @@ setInterval( () => {
 resize(screen.width, screen.height * y_scale);
 get_window_pixels();
 setInterval(render, 1);
-
-// 1000 / 60
