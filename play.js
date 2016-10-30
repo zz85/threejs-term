@@ -15,7 +15,7 @@ const fs = require('fs');
  * 29 Oct 2016
  *
  * TODOs
- *  - get mouse support for controls
+ *  - optimize ascii conversion by pull from canvas data
  *  - add key controls too!
  *  - think of a good name for the project
  *  - add nice fps graphs
@@ -29,6 +29,7 @@ const fs = require('fs');
  *  - detecting term pixel and columal sizes
  *  - convert to nice ascii effects
  *     (well blessed's ascii image did all the heavy lifting)
+ *  - get mouse support for controls
  *
  * Also see,
  *  ascii_effect
@@ -54,28 +55,25 @@ camera.position.z = 500;
 
 EventEmitter = require('events').EventEmitter;
 document = new EventEmitter();
-document.addEventListener = (name, handler) => {
-	console.error('add event', name)
-	document.addListener(name, handler);
-}
+document.addEventListener = document.addListener;
 document.removeEventListener = document.removeListener;
 
 window = {
 	get innerWidth() {
-		console.error('ask width', screen ? screen.width : width);
-		return screen ? screen.width : width;
+		return screen ? screen.width: width;
 	},
 
 	get innerHeight() {
 		return screen ? screen.height: height;
 	},
 
-	addEventListener(a, b, c) {
-		document.addEventListener(a, b);
-		console.error('implement me', a)
+	addEventListener(type, handler) {
+		document.addEventListener(type, handler);
+		console.error('implement me', type)
 	}
 }
 controls = new THREE.TrackballControls( camera );
+controls.rotateSpeed = 4;
 
 const params = {
 	canvas: canvas, // pass in fake canvas
@@ -124,9 +122,9 @@ var icon = blessed.image({
 	//   border: { type: 'line' },
 	search: false,
 	ascii: true,
-	optimization: 'cpu',
+	optimization: 'cpu', // cpu mem
 	animate: false,
-	speed: 1000
+	colors: false
 });
 
 var box = blessed.box({
@@ -164,8 +162,6 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 box.focus();
 box.on('click', clearlog);
 
-let mouseDown = false;
-
 const noop = () => {};
 const _convert_event = (e) => ({
 	pageX: e.x,
@@ -175,10 +171,10 @@ const _convert_event = (e) => ({
 	button: 0
 });
 
+let mouseDown = false;
+
 function mousemoving(e) {
-	console.error('mousemove', e.x);
 	document.emit('mousemove', _convert_event(e));
-	// console.error('mouse', e.action, e.x, e.y, screen.width, screen.height);
 }
 
 screen.on('mousedown', function(e) {
@@ -186,24 +182,16 @@ screen.on('mousedown', function(e) {
 		mousemoving(e);
 		return;
 	}
-	console.error('mousedown');
 	mouseDown = true;
 	document.emit('mousedown', _convert_event(e));
 })
+
+screen.on('mousemove', mousemoving);
 
 screen.on('mouseup', function(e) {
 	mouseDown = false;
 	document.emit('mouseup', _convert_event(e));
 })
-
-// setInterval( () => {
-// 	document.emit('mousemove', _convert_event({
-// 		x: 1,
-// 		y: 1
-// 	}));
-// }, 500);
-
-screen.on('mousemove', mousemoving);
 
 // This doesn't seem to work so well, so use screen.program
 screen.on('resize', function(e) {
