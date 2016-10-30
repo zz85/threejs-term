@@ -17,9 +17,10 @@ const fs = require('fs');
  *
  * TODOs
  *  - optimize ascii conversion by pull from canvas data
- *  - think of a good name for the project
  *  - add nice fps graphs
  *  - modularize This
+ *    - Dom Polyfilling
+ *    - TerminalRenderer
  *  - publish to npm as a cli module!
  *  - profit? :D
  *
@@ -31,6 +32,7 @@ const fs = require('fs');
  *     (well blessed's ascii image did all the heavy lifting)
  *  - get mouse support for controls
  *  - add key controls too!
+ *  - think of a good name for the project
  *
  * Also see,
  *  https://threejs.org/examples/canvas_ascii_effect.html
@@ -243,8 +245,10 @@ const get_window_pixels = _ => screen.program.manipulateWindow(14, (e, res) => {
 	// console.error('pixel size', res);
 	if (e) {
 		// This terminal don't support the p 1 4 (window pixel dimension command) :(
+		console.error('Terminal does not support pixel dimension');
 		return;
 	}
+
 	const fontWidth = res.width / screen.width;
 	const fontHeight = res.height / screen.height;
 	y_scale = fontHeight / fontWidth;
