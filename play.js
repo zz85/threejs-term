@@ -94,7 +94,6 @@ var icon = blessed.image({
 	speed: 1000
 });
 
-
 var box = blessed.box({
 	parent: screen,
 	top: '0',
@@ -173,24 +172,23 @@ get_window_pixels = _ => screen.program.manipulateWindow(14, (e, res) => {
 })
 
 function render() {
-	const timer = Date.now() - start;
-	sphere.position.y = Math.abs( Math.sin( timer * 0.002 ) ) * 150;
-	sphere.rotation.x = timer * 0.0003;
-	sphere.rotation.z = timer * 0.0002;
-}
-
-const start = Date.now();
-
-setInterval( () => {
 	const start = Date.now()
-	render();
+
+	// const timer = Date.now() - start;
+	sphere.position.y = Math.abs( Math.sin( start * 0.002 ) ) * 150;
+	sphere.rotation.x = start * 0.0003;
+	sphere.rotation.z = start * 0.0002;
+
 	renderer.render(scene, camera);
 	icon.setImage(canvas.toBuffer())
 	screen.render();
 	saveCanvas();
+
 	const done = Date.now()
 	// log('Render time took', done - start);
-}, 30)
+}
+
+const start = Date.now();
 
 function log(...args) {
 	box.setContent(
@@ -204,3 +202,4 @@ function clearlog() {
 
 resize(screen.width, screen.height * y_scale);
 get_window_pixels();
+setInterval(render, 1000 / 60);
