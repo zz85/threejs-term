@@ -4,6 +4,10 @@ Canvas = require('canvas');
 require('three/examples/js/renderers/Projector');
 require('three/examples/js/renderers/SoftwareRenderer');
 require('three/examples/js/renderers/CanvasRenderer');
+
+require('three/examples/js/controls/TrackballControls');
+// require('./track');
+
 const fs = require('fs');
 
 /*
@@ -12,13 +16,19 @@ const fs = require('fs');
  *
  * TODOs
  *  - get mouse support for controls
- *  - convert to nice ascii effects
+ *  - add key controls too!
  *  - think of a good name for the project
+ *  - add nice fps graphs
+ *  - modularize This
+ *  - publish to npm as a cli module!
+ *  - profit? :D
  *
- * Kinda doneish
+ * Kinda done-ish
  *  - getting canvas renderer to work
  *  - rendering canvas to fs
  *  - detecting term pixel and columal sizes
+ *  - convert to nice ascii effects
+ *     (well blessed's ascii image did all the heavy lifting)
  *
  * Also see,
  *  ascii_effect
@@ -42,18 +52,44 @@ const camera = new THREE.PerspectiveCamera( 70, width / height, 1, 1000 );
 camera.position.y = 150;
 camera.position.z = 500;
 
+EventEmitter = require('events').EventEmitter;
+document = new EventEmitter();
+document.addEventListener = (name, handler) => {
+	console.error('add event', name)
+	document.addListener(name, handler);
+}
+document.removeEventListener = document.removeListener;
+
+window = {
+	get innerWidth() {
+		console.error('ask width', screen ? screen.width : width);
+		return screen ? screen.width : width;
+	},
+
+	get innerHeight() {
+		return screen ? screen.height: height;
+	},
+
+	addEventListener(a, b, c) {
+		document.addEventListener(a, b);
+		console.error('implement me', a)
+	}
+}
+controls = new THREE.TrackballControls( camera );
+
 const params = {
 	canvas: canvas, // pass in fake canvas
 };
 
 function resize(w, h) {
+	log('resizing');
+	controls.handleResize();
 	width = w;
 	height = h;
 	camera.aspect = w / h;
 	camera.updateProjectionMatrix();
 	renderer.setSize(w, h);
 }
-
 
 // renderer = new THREE.SoftwareRenderer(params); // TODO pass in raw arrays and render that instead
 renderer = new THREE.CanvasRenderer(params);
@@ -65,7 +101,6 @@ function saveCanvas() {
 	const out = fs.createWriteStream("./test-out4.png");
 	const canvasStream = canvas.pngStream().pipe(out);
 }
-
 
 var blessed = require('blessed');
 
@@ -119,6 +154,9 @@ var box = blessed.box({
 
 // Quit on Escape, q, or Control-C.
 screen.key(['escape', 'q', 'C-c'], function(ch, key) {
+	// TODO should flush or may cause screen corruption!
+	// screen.flush();
+	// Maybe, send Ctrl-C to it's own process instead
 	return process.exit(0);
 });
 
@@ -126,14 +164,46 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 box.focus();
 box.on('click', clearlog);
 
-screen.on('mousedown', function(e) {
-	// e.action === 'mousedown';
-	log('mouse', e.x, e.y, screen.width, screen.height);
+let mouseDown = false;
+
+const noop = () => {};
+const _convert_event = (e) => ({
+	pageX: e.x,
+	pageY: e.y,
+	preventDefault: noop,
+	stopPropagation: noop,
+	button: 0
 });
 
-screen.program.on('response', function(e) {
-	console.error('res', e);
+function mousemoving(e) {
+	console.error('mousemove', e.x);
+	document.emit('mousemove', _convert_event(e));
+	// console.error('mouse', e.action, e.x, e.y, screen.width, screen.height);
+}
+
+screen.on('mousedown', function(e) {
+	if (mouseDown) {
+		mousemoving(e);
+		return;
+	}
+	console.error('mousedown');
+	mouseDown = true;
+	document.emit('mousedown', _convert_event(e));
 })
+
+screen.on('mouseup', function(e) {
+	mouseDown = false;
+	document.emit('mouseup', _convert_event(e));
+})
+
+// setInterval( () => {
+// 	document.emit('mousemove', _convert_event({
+// 		x: 1,
+// 		y: 1
+// 	}));
+// }, 500);
+
+screen.on('mousemove', mousemoving);
 
 // This doesn't seem to work so well, so use screen.program
 screen.on('resize', function(e) {
@@ -145,8 +215,9 @@ screen.program.on('resize', e => {
 	get_window_pixels();
 });
 
-get_window_pixels = _ => screen.program.manipulateWindow(14, (e, res) => {
-	console.error('pixel size', res);
+// Secret Code to get Terminal's Window Pixel Size
+const get_window_pixels = _ => screen.program.manipulateWindow(14, (e, res) => {
+	// console.error('pixel size', res);
 	const fontWidth = res.width / screen.width;
 	const fontHeight = res.height / screen.height;
 	y_scale = fontHeight / fontWidth;
@@ -166,7 +237,7 @@ get_window_pixels = _ => screen.program.manipulateWindow(14, (e, res) => {
 		width: 1375,
 		windowSizePixels: { height: 830, width: 1375 } }
 	*/
-})
+});
 
 function render() {
 	const start = Date.now()
@@ -176,6 +247,8 @@ function render() {
 	sphere.rotation.x = start * 0.0003;
 	sphere.rotation.z = start * 0.0002;
 
+	controls.update();
+
 	// Render
 	renderer.render(scene, camera);
 
@@ -184,7 +257,7 @@ function render() {
 	screen.render();
 
 	// Save canvas
-	// saveCanvas();
+	saveCanvas();
 
 	const done = Date.now()
 	log('Render time took', done - start);
