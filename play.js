@@ -90,6 +90,24 @@ const box = blessed.box({
 	}
 });
 
+
+var sparkline = contrib.sparkline(
+     {
+		//  label: 'Throughput (bits/sec)'
+     tags: true
+	 , border: {
+		type: 'line'
+	}
+    //  , style: { fg: 'black', bg: 'blue' }
+	//  , width: '100'
+	//  , height: '160'
+	, width: 'shrink' // shrink
+	, height: 'shrink'
+	 , top: '10'
+	 , right: '0'
+	, parent: screen
+})
+
 // Quit on Escape, q, or Control-C.
 screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 	// TODO should flush or may cause screen corruption!
@@ -152,7 +170,7 @@ function render() {
 	// saveCanvas();
 	const done = Date.now()
 	// log('Render time took', done - start);
-	frames ++;
+	frames++;
 }
 
 const start = Date.now();
@@ -169,13 +187,32 @@ function clearlog() {
 
 let last = Date.now,
 frames = 0;
+fpss = []
+mems = []
 setInterval( () => {
 	const now = Date.now();
 	const fps = frames / (now - last) * 1000;
 	clearlog()
 	log('FPS: ' + fps.toFixed(2))
+
 	last = now;
 	frames = 0;
+	if (isFinite(fps)) {
+		fpss.push(fps)
+		const rss = process.memoryUsage().rss / 1024 / 1024;
+		mems.push(rss);
+
+		if (fpss.length > 15) {
+			fpss.shift();
+			mems.shift();
+		}
+
+
+		sparkline.setData(
+			[ 'FPS - ' + fps.toFixed(2), 'Mem - ' + rss.toFixed(2) + 'MB'],
+			[ fpss, mems ]
+		);
+	}
 }, 1000)
 
 function resize(w, h) {
@@ -191,6 +228,9 @@ function resize(w, h) {
 function saveCanvas() {
 	renderer.saveToFile('./test-out4.png')
 }
+
+
+
 
 const { scene } = require('./scene');
 init();
