@@ -7,8 +7,18 @@ require('three/examples/js/renderers/CanvasRenderer');
 const fs = require('fs');
 
 /*
- * Attempt to use three.js in node.js
+ * Attempt to use three.js in the terminal / node.js
  * 29 Oct 2016
+ *
+ * TODOs
+ *  - get mouse support for controls
+ *  - convert to nice ascii effects
+ *  - think of a good name for the project
+ *
+ * Kinda doneish
+ *  - getting canvas renderer to work
+ *  - rendering canvas to fs
+ *  - detecting term pixel and columal sizes
  *
  * Also see,
  *  ascii_effect
@@ -140,7 +150,7 @@ get_window_pixels = _ => screen.program.manipulateWindow(14, (e, res) => {
 	const fontWidth = res.width / screen.width;
 	const fontHeight = res.height / screen.height;
 	y_scale = fontHeight / fontWidth;
-	log(`Estimated font size ${fontWidth.toFixed(3)}x${fontHeight.toFixed(3)}, scale ${y_scale.toFixed(3)}`);
+	log(`Estimated font size ${fontWidth.toFixed(3)}x${fontHeight.toFixed(3)}, ratio ${y_scale.toFixed(3)}`);
 
 	width = res.width * rendering_scale | 0;
 	height = res.height * rendering_scale | 0;
