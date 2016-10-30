@@ -1,15 +1,12 @@
 #! /usr/bin/env node
 
 THREE = require('three');
-Canvas = require('canvas');
-
-require('three/examples/js/renderers/Projector');
-require('three/examples/js/renderers/SoftwareRenderer');
-require('three/examples/js/renderers/CanvasRenderer');
 
 require('three/examples/js/controls/TrackballControls');
+require('./TerminalRenderer');
 
-const fs = require('fs');
+const blessed = require('blessed');
+const contrib = require('blessed-contrib');
 
 /*
  * Attempt to use three.js in the terminal / node.js
@@ -18,10 +15,8 @@ const fs = require('fs');
  * TODOs
  *  - optimize ascii conversion by pull from canvas data
  *  - add nice fps graphs
- *  - modularize This
- *    - Dom Polyfilling
- *    - TerminalRenderer
- *  - publish to npm as a cli module!
+ *  - make this runs with more examples! (preferably by automating most stuff)
+ *  - add docopts to configure parameters
  *  - profit? :D
  *
  * Kinda done-ish
@@ -33,6 +28,10 @@ const fs = require('fs');
  *  - get mouse support for controls
  *  - add key controls too!
  *  - think of a good name for the project
+ *  - publish to npm as a cli module!
+ *  - modularize This
+ *    - Dom Polyfilling
+ *    - TerminalRenderer
  *
  * Also see,
  *  https://threejs.org/examples/canvas_ascii_effect.html
@@ -42,87 +41,19 @@ const fs = require('fs');
 
 let y_scale = 2;
 let rendering_scale = 0.05;
-let width = 640 * rendering_scale;
-let height = 480 * rendering_scale;
-
-
-// Set up fake canvas
-canvas = new Canvas()
-canvas.style = {};
-const { scene } = require('./scene');
-
-const camera = new THREE.PerspectiveCamera( 70, width / height, 1, 1000 );
-camera.position.y = 150;
-camera.position.z = 500;
-
-// Polyfilling
-EventEmitter = require('events').EventEmitter;
-document = new EventEmitter();
-document.addEventListener = document.addListener;
-document.removeEventListener = document.removeListener;
-
-window = {
-	get innerWidth() {
-		return screen ? screen.width: width;
-	},
-
-	get innerHeight() {
-		return screen ? screen.height: height;
-	},
-
-	addEventListener(type, handler) {
-		// better make sure you emulate these events!
-		document.addEventListener(type, handler);
-	},
-
-	removeEventListener(type, handler) {
-		document.removeEventListener(type, handler);
-	}
-}
-controls = new THREE.TrackballControls( camera );
-controls.rotateSpeed *= 4;
-controls.zoomSpeed *= 4;
-controls.panSpeed *= 4;
-
-
-const params = {
-	canvas: canvas, // pass in fake canvas
-};
-
-function resize(w, h) {
-	log('resizing');
-	controls.handleResize();
-	width = w;
-	height = h;
-	camera.aspect = w / h;
-	camera.updateProjectionMatrix();
-	renderer.setSize(w, h);
-}
-
-// renderer = new THREE.SoftwareRenderer(params); // TODO pass in raw arrays and render that instead
-renderer = new THREE.CanvasRenderer(params);
-renderer.setClearColor( 0xf0f0f0 );
-renderer.render(scene, camera);
-
-function saveCanvas() {
-	// Write canvas to file
-	const out = fs.createWriteStream("./test-out4.png");
-	const canvasStream = canvas.pngStream().pipe(out);
-}
-
-var blessed = require('blessed');
+width = 640 * rendering_scale;
+height = 480 * rendering_scale;
 
 // Create a screen object.
-var screen = blessed.screen({
+const screen = blessed.screen({
   smartCSR: true,
   fullUnicode: true
 });
 
 screen.title = 'Three.js Terminal';
 
-
 // placeholder for renderering
-var icon = blessed.image({
+const canvas = blessed.image({
 	parent: screen,
 	top: 0,
 	left: 0,
@@ -136,7 +67,7 @@ var icon = blessed.image({
 	animate: false
 });
 
-var box = blessed.box({
+const box = blessed.box({
 	parent: screen,
 	top: '0',
 	left: '0',
@@ -168,107 +99,38 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 });
 
 // Focus our element.
-box.focus();
+canvas.focus();
 box.on('click', clearlog);
 
-const noop = () => {};
-const _convert_event = (e) => ({
-	pageX: e.x,
-	pageY: e.y,
-	preventDefault: noop,
-	stopPropagation: noop,
-	button: 0
-});
+function init() {
+	require('./dom_polyfill')(screen);
 
-let mouseDown = false;
+	camera = new THREE.PerspectiveCamera( 70, width / height, 1, 1000 );
+	camera.position.y = 150;
+	camera.position.z = 500;
 
-screen.on('mousedown', function(e) {
-	if (mouseDown) {
-		document.emit('mousemove', _convert_event(e));
-		return;
-	}
-	mouseDown = true;
-	document.emit('mousedown', _convert_event(e));
-})
+	controls = new THREE.TrackballControls( camera );
+	controls.rotateSpeed *= 4;
+	controls.zoomSpeed *= 4;
+	controls.panSpeed *= 4;
 
-screen.on('mousemove', function mousemoving(e) {
-	document.emit('mousemove', _convert_event(e));
-});
+	renderer = new THREE.TerminalRenderer(canvas);
+	renderer.setClearColor( 0xf0f0f0 );
 
-screen.on('mouseup', function(e) {
-	mouseDown = false;
-	document.emit('mouseup', _convert_event(e));
-});
+	window.addEventListener('resize', (res) => {
+		log(`Resized ${screen.program.columns}, ${screen.program.rows}`);
+		const fontWidth = res.width / screen.width;
+		const fontHeight = res.height / screen.height;
+		y_scale = fontHeight / fontWidth;
+		log(`Estimated font size ${fontWidth.toFixed(3)}x${fontHeight.toFixed(3)}, ratio ${y_scale.toFixed(3)}`);
 
-// screen.on('keypress', function(...args) {
-// 	console.error('keydown', args);
-// })
+		width = res.width * rendering_scale | 0;
+		height = res.height * rendering_scale | 0;
+		log(`Rendering using ${width}x${height}px`);
 
-const keysDown = {};
-const keyToCode = {
-	'a': 65,
-	's': 83,
-	'd': 68
-};
-
-// emulate keydown and keyup
-// screen.key(['a', 's', 'd'], function(e) {
-screen.on('keypress', function(e, f) {
-	if (keysDown[e]) {
-		clearTimeout(keysDown[e]);
-	} else {
-		document.emit('keydown', {
-			keyCode: keyToCode[e]
-		})
-	}
-
-	keysDown[e] = setTimeout( () => {
-		keysDown[e] = null;
-		document.emit('keyup', {
-			keyCode: keyToCode[e]
-		});
-	}, 300);
-})
-
-// This doesn't seem to work so well, so use screen.program
-screen.on('resize', function(e) {
-	console.log('resizing', e);
-});
-
-screen.program.on('resize', e => {
-	log(`Resized ${screen.program.columns}, ${screen.program.rows}`);
-	get_window_pixels();
-});
-
-// Secret Code to get Terminal's Window Pixel Size
-const get_window_pixels = _ => screen.program.manipulateWindow(14, (e, res) => {
-	// console.error('pixel size', res);
-	if (e) {
-		// This terminal don't support the p 1 4 (window pixel dimension command) :(
-		console.error('Terminal does not support pixel dimension');
-		return;
-	}
-
-	const fontWidth = res.width / screen.width;
-	const fontHeight = res.height / screen.height;
-	y_scale = fontHeight / fontWidth;
-	log(`Estimated font size ${fontWidth.toFixed(3)}x${fontHeight.toFixed(3)}, ratio ${y_scale.toFixed(3)}`);
-
-	width = res.width * rendering_scale | 0;
-	height = res.height * rendering_scale | 0;
-	log(`Rendering using ${width}x${height}px`);
-	resize(width, height);
-
-	/*
-	{ event: 'window-manipulation',
-		code: '',
-		type: 'window-size-pixels',
-		size: { height: 830, width: 1375 },
-		height: 830,
-		width: 1375,
-		windowSizePixels: { height: 830, width: 1375 } }
-	*/
-});
+		resize(width, height);
+	});
+}
 
 function render() {
 	const start = Date.now()
@@ -284,12 +146,10 @@ function render() {
 	renderer.render(scene, camera);
 
 	// Render screen to terminal
-	icon.setImage(canvas.toBuffer());
 	screen.render();
 
 	// // Save canvas
 	// saveCanvas();
-
 	const done = Date.now()
 	// log('Render time took', done - start);
 	frames ++;
@@ -318,7 +178,21 @@ setInterval( () => {
 	frames = 0;
 }, 1000)
 
+function resize(w, h) {
+	log('resizing');
+	controls.handleResize();
+	width = w;
+	height = h;
+	camera.aspect = w / h;
+	camera.updateProjectionMatrix();
+	renderer.setSize(w, h);
+}
 
+function saveCanvas() {
+	renderer.saveToFile('./test-out4.png')
+}
+
+const { scene } = require('./scene');
+init();
 resize(screen.width, screen.height * y_scale);
-get_window_pixels();
 setInterval(render, 1);
