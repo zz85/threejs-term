@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 THREE = require('three');
 Canvas = require('canvas');
 
@@ -6,7 +8,6 @@ require('three/examples/js/renderers/SoftwareRenderer');
 require('three/examples/js/renderers/CanvasRenderer');
 
 require('three/examples/js/controls/TrackballControls');
-// require('./track');
 
 const fs = require('fs');
 

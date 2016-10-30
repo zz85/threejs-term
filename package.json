@@ -1,11 +1,19 @@
 {
-  "name": "three-blessed",
+  "name": "threejs-term",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "play.js",
   "license": "MIT",
+  "bin": {
+    "threejs-term": "play.js"
+  },
+  "scripts": {
+    "start": "node play.js"
+  },
   "dependencies": {
     "blessed": "^0.1.81",
+    "blessed-contrib": "^4.5.5",
     "canvas": "^1.6.1",
     "three": "^0.82.1"
-  }
+  },
+  "url": "https://github.com/zz85/threejs-term"
 }
