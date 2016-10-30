@@ -241,6 +241,10 @@ screen.program.on('resize', e => {
 // Secret Code to get Terminal's Window Pixel Size
 const get_window_pixels = _ => screen.program.manipulateWindow(14, (e, res) => {
 	// console.error('pixel size', res);
+	if (e) {
+		// This terminal don't support the p 1 4 (window pixel dimension command) :(
+		return;
+	}
 	const fontWidth = res.width / screen.width;
 	const fontHeight = res.height / screen.height;
 	y_scale = fontHeight / fontWidth;
