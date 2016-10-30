@@ -39,7 +39,7 @@ const fs = require('fs');
  */
 
 let y_scale = 2;
-let rendering_scale = 0.15;
+let rendering_scale = 0.05;
 let width = 640 * rendering_scale;
 let height = 480 * rendering_scale;
 
@@ -53,6 +53,7 @@ const camera = new THREE.PerspectiveCamera( 70, width / height, 1, 1000 );
 camera.position.y = 150;
 camera.position.z = 500;
 
+// Polyfilling
 EventEmitter = require('events').EventEmitter;
 document = new EventEmitter();
 document.addEventListener = document.addListener;
@@ -69,11 +70,19 @@ window = {
 
 	addEventListener(type, handler) {
 		document.addEventListener(type, handler);
-		console.error('implement me', type)
+		// console.error('implement me', type)
+	},
+
+	removeEventListener(type, handler) {
+		document.removeEventListener(type, handler);
+		// console.error('implement me', type)
 	}
 }
 controls = new THREE.TrackballControls( camera );
-controls.rotateSpeed = 4;
+controls.rotateSpeed *= 4;
+controls.zoomSpeed *= 4;
+controls.panSpeed *= 4;
+
 
 const params = {
 	canvas: canvas, // pass in fake canvas
@@ -123,8 +132,7 @@ var icon = blessed.image({
 	search: false,
 	ascii: true,
 	optimization: 'cpu', // cpu mem
-	animate: false,
-	colors: false
+	animate: false
 });
 
 var box = blessed.box({
@@ -173,24 +181,52 @@ const _convert_event = (e) => ({
 
 let mouseDown = false;
 
-function mousemoving(e) {
-	document.emit('mousemove', _convert_event(e));
-}
-
 screen.on('mousedown', function(e) {
 	if (mouseDown) {
-		mousemoving(e);
+		document.emit('mousemove', _convert_event(e));
 		return;
 	}
 	mouseDown = true;
 	document.emit('mousedown', _convert_event(e));
 })
 
-screen.on('mousemove', mousemoving);
+screen.on('mousemove', function mousemoving(e) {
+	document.emit('mousemove', _convert_event(e));
+});
 
 screen.on('mouseup', function(e) {
 	mouseDown = false;
 	document.emit('mouseup', _convert_event(e));
+});
+
+// screen.on('keypress', function(...args) {
+// 	console.error('keydown', args);
+// })
+
+const keysDown = {};
+const keyToCode = {
+	'a': 65,
+	's': 83,
+	'd': 68
+};
+
+// emulate keydown and keyup
+screen.key(['a', 's', 'd'], function(e) {
+// screen.on('keypress', function(e, f) {
+	if (keysDown[e]) {
+		clearTimeout(keysDown[e]);
+	} else {
+		document.emit('keydown', {
+			keyCode: keyToCode[e]
+		})
+	}
+
+	keysDown[e] = setTimeout( () => {
+		keysDown[e] = null;
+		document.emit('keyup', {
+			keyCode: keyToCode[e]
+		});
+	}, 300);
 })
 
 // This doesn't seem to work so well, so use screen.program
@@ -248,7 +284,7 @@ function render() {
 	saveCanvas();
 
 	const done = Date.now()
-	log('Render time took', done - start);
+	// log('Render time took', done - start);
 	frames ++;
 }
 
