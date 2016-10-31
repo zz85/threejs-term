@@ -1,6 +1,6 @@
 {
   "name": "threejs-term",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "play.js",
   "license": "MIT",
   "bin": {
