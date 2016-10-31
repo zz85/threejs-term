@@ -10,7 +10,7 @@ require('./TerminalRenderer');
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');
 
-const { FPSCounter } = require('./counters');
+const { FPSCounter, MemCounter } = require('./counters');
 
 /*
  * Attempt to use three.js in the terminal / node.js
@@ -172,7 +172,7 @@ function render() {
 	// saveCanvas();
 	const done = Date.now()
 	// log('Render time took', done - start);
-	fpsCounter.update();
+	fpsCounter.inc();
 }
 
 const start = Date.now();
@@ -194,19 +194,19 @@ memCounter = new MemCounter();
 setInterval( () => {
 	// clearlog()
 	// log('FPS: ' + fps.toFixed(2))
-	fpsCounter.calculate();
+	fpsCounter.update();
 	memCounter.update();
 
 	const dataset = [ fpsCounter.fps
 		, memCounter.data
-		// , fpsCounter.ms
+		, fpsCounter.ms
 		];
 
 	// TODO refactor custom sparkline into it's own widget?
 	sparkline.setData(
 		[ 'FPS ' + fpsCounter.currentFps.toFixed(2)
 			, 'Mem ' + memCounter.current.toFixed(2) + 'MB'
-			// , 'MS ' + fpsCounter.currentMs.toFixed(2)
+			, 'MS ' + fpsCounter.currentMs.toFixed(2)
 			],
 		dataset
 	);

@@ -7,11 +7,11 @@ class FPSCounter {
         this.frames = 0;
     }
 
-    update() {
+    inc() {
         this.frames++;
     }
 
-    calculate() {
+    update() {
         const now = Date.now();
         const lapsed = now - this.then;
         const fps = this.frames / lapsed * 1000;
@@ -35,7 +35,7 @@ class FPSCounter {
 
 class MemCounter {
     constructor() {
-        this.mem = []
+        this.data = []
         this.bufferSize = 12;
         this.current;
     }
@@ -43,9 +43,9 @@ class MemCounter {
     update() {
         const rss = process.memoryUsage().rss / 1024 / 1024;
         this.current = rss;
-        this.mem.push(rss);
-        if (this.mem.length > this.bufferSize) {
-            this.mem.shift();
+        this.data.push(rss);
+        if (this.data.length > this.bufferSize) {
+            this.data.shift();
         }
     }
 }
