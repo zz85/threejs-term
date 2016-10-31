@@ -10,15 +10,18 @@ require('./TerminalRenderer');
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');
 
+const { FPSCounter } = require('./counters');
+
 /*
  * Attempt to use three.js in the terminal / node.js
  * 29 Oct 2016
  *
  * TODOs
  *  - optimize ascii conversion by pull from canvas data
- *  - add nice fps graphs
+ *  - try rendering to terminal using drawille / braille characters
  *  - make this runs with more examples! (preferably by automating most stuff)
- *  - add docopts to configure parameters
+ *  - add docopts to configure parameters (scale, renderers)
+ *  - support webgl and software renderers
  *  - profit? :D
  *
  * Kinda done-ish
@@ -34,6 +37,7 @@ const contrib = require('blessed-contrib');
  *  - modularize This
  *    - Dom Polyfilling
  *    - TerminalRenderer
+ *  - add nice fps graphs
  *
  * Also see,
  *  https://threejs.org/examples/canvas_ascii_effect.html
@@ -168,7 +172,7 @@ function render() {
 	// saveCanvas();
 	const done = Date.now()
 	// log('Render time took', done - start);
-	frames++;
+	fpsCounter.update();
 }
 
 const start = Date.now();
@@ -183,46 +187,29 @@ function clearlog() {
 	box.setContent('{bold}Logs{/bold}\n');
 }
 
-let last = Date.now,
-frames = 0;
-
-// TODO refactor this to its own stats class.
-fpss = []
 mems = []
-ms = []
+fpsCounter = new FPSCounter();
+memCounter = new MemCounter();
 
 setInterval( () => {
-	const now = Date.now();
-	const fps = frames / (now - last) * 1000;
 	// clearlog()
 	// log('FPS: ' + fps.toFixed(2))
+	fpsCounter.calculate();
+	memCounter.update();
 
-	if (isFinite(fps)) {
-		fpss.push(fps)
-		const rss = process.memoryUsage().rss / 1024 / 1024;
-		mems.push(rss);
-		ms.push((now - last) / frames)
+	const dataset = [ fpsCounter.fps
+		, memCounter.data
+		// , fpsCounter.ms
+		];
 
-		if (fpss.length > 12) {
-			fpss.shift();
-			mems.shift();
-			ms.shift();
-		}
-
-		sparkline.setData(
-			[ 'FPS ' + fps.toFixed(2)
-				, 'Mem ' + rss.toFixed(2) + 'MB'
-				// , 'MS ' + ms[ms.length - 1].toFixed(2)
-				],
-			[ fpss
-				, mems
-				// , ms
-				]
-		);
-	}
-
-	last = now;
-	frames = 0;
+	// TODO refactor custom sparkline into it's own widget?
+	sparkline.setData(
+		[ 'FPS ' + fpsCounter.currentFps.toFixed(2)
+			, 'Mem ' + memCounter.current.toFixed(2) + 'MB'
+			// , 'MS ' + fpsCounter.currentMs.toFixed(2)
+			],
+		dataset
+	);
 }, 1000)
 
 function resize(w, h) {
