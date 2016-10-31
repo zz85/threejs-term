@@ -24,6 +24,7 @@ const { FPSCounter, MemCounter } = require('./counters');
  *  - add docopts to configure parameters (scale, renderers)
  *  - support webgl and software renderers
  *  - add key controls to adjust parameters inside the terminal
+ *  - try ttystudio
  *  - profit? :D
  *
  * Kinda done-ish

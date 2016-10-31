@@ -13,6 +13,10 @@ $ npm install -g threejs-term # install and link binary
 $ threejs-term # runs the demo
 ```
 
+### Troubleshooting
+If npm install fails to compile Canvas bindings to Cario, make sure your system have the [necessary libraries](https://github.com/Automattic/node-canvas).
+For mac homebrew users, you can simply run `brew install cario`.
+
 ### Features
 - Shows off using three.js in node based environments.
 - Terminal / ASCII based rendering
