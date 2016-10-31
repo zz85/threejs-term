@@ -49,7 +49,7 @@ const { FPSCounter, MemCounter } = require('./counters');
  */
 
 let y_scale = 2;
-let rendering_scale = 0.05;
+let rendering_scale = 0.15;
 width = 640 * rendering_scale;
 height = 480 * rendering_scale;
 
@@ -88,7 +88,7 @@ const canvas = blessed.image({
 });
 
 const box = blessed.box({
-	parent: screen,
+	// parent: screen,
 	top: '0',
 	left: '0',
 	width: 'shrink',
@@ -210,7 +210,6 @@ function clearlog() {
 	box.setContent();
 }
 
-mems = []
 fpsCounter = new FPSCounter();
 memCounter = new MemCounter();
 
@@ -236,7 +235,7 @@ setInterval( () => {
 }, 1000);
 
 function resize(w, h) {
-	// screen.debug('resizing', w, h);
+	// screen.debug('resizing', w, h, screen.width, screen.height);
 	controls.handleResize();
 	width = w;
 	height = h;
@@ -251,4 +250,4 @@ function saveCanvas() {
 
 const { scene } = require('./scene');
 init();
-setInterval(render, 1);
+setInterval(render, 1000 / 60);

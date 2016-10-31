@@ -76,10 +76,8 @@ module.exports = function(screen) {
     // screen.key(['a', 's', 'd'], function(e) {
     screen.on('keypress', function(e, f) {
         if (keysDown[e]) {
-            screen.debug('keydowned');
             clearTimeout(keysDown[e]);
         } else {
-            screen.debug('keydown');
             document.emit('keydown', {
                 keyCode: keyToCode[e]
             })
@@ -87,7 +85,6 @@ module.exports = function(screen) {
 
         keysDown[e] = setTimeout( () => {
             keysDown[e] = null;
-            screen.debug('keyup');
             document.emit('keyup', {
                 keyCode: keyToCode[e]
             });
