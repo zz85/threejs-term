@@ -7,7 +7,8 @@
     "threejs-term": "play.js"
   },
   "scripts": {
-    "start": "node play.js"
+    "start": "threejs-term",
+    "dev": "npm start 2>> errors.log"
   },
   "dependencies": {
     "blessed": "^0.1.81",

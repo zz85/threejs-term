@@ -1,4 +1,6 @@
 #! /usr/bin/env node
+process.env['LANG'] = 'utf8';
+process.env['TERM'] = 'xterm-256color';
 
 THREE = require('three');
 
@@ -90,8 +92,7 @@ const box = blessed.box({
 	}
 });
 
-
-var sparkline = contrib.sparkline({
+const sparkline = contrib.sparkline({
 	label: 'Stats'
     , tags: true
 	, border: {
@@ -184,6 +185,8 @@ function clearlog() {
 
 let last = Date.now,
 frames = 0;
+
+// TODO refactor this to its own stats class.
 fpss = []
 mems = []
 ms = []
@@ -191,8 +194,8 @@ ms = []
 setInterval( () => {
 	const now = Date.now();
 	const fps = frames / (now - last) * 1000;
-	clearlog()
-	log('FPS: ' + fps.toFixed(2))
+	// clearlog()
+	// log('FPS: ' + fps.toFixed(2))
 
 	if (isFinite(fps)) {
 		fpss.push(fps)
@@ -209,10 +212,12 @@ setInterval( () => {
 		sparkline.setData(
 			[ 'FPS ' + fps.toFixed(2)
 				, 'Mem ' + rss.toFixed(2) + 'MB'
-				, 'MS ' + ms[ms.length - 1].toFixed(2)],
+				// , 'MS ' + ms[ms.length - 1].toFixed(2)
+				],
 			[ fpss
 				, mems
-				, ms ]
+				// , ms
+				]
 		);
 	}
 
