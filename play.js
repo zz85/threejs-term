@@ -91,20 +91,17 @@ const box = blessed.box({
 });
 
 
-var sparkline = contrib.sparkline(
-     {
-		//  label: 'Throughput (bits/sec)'
-     tags: true
-	 , border: {
+var sparkline = contrib.sparkline({
+	label: 'Stats'
+    , tags: true
+	, border: {
 		type: 'line'
 	}
-    //  , style: { fg: 'black', bg: 'blue' }
-	//  , width: '100'
-	//  , height: '160'
-	, width: 'shrink' // shrink
-	, height: 'shrink'
-	 , top: '10'
-	 , right: '0'
+	, style: { fg: '#f08', bg: '#201' } // 0ff 0f0 f08 / 002 020 201 (stats.js colors)
+	, width: 'shrink' // 100
+	, height: 'shrink' // 160
+	, top: '10'
+	, right: '0'
 	, parent: screen
 })
 
@@ -189,30 +186,38 @@ let last = Date.now,
 frames = 0;
 fpss = []
 mems = []
+ms = []
+
 setInterval( () => {
 	const now = Date.now();
 	const fps = frames / (now - last) * 1000;
 	clearlog()
 	log('FPS: ' + fps.toFixed(2))
 
-	last = now;
-	frames = 0;
 	if (isFinite(fps)) {
 		fpss.push(fps)
 		const rss = process.memoryUsage().rss / 1024 / 1024;
 		mems.push(rss);
+		ms.push((now - last) / frames)
 
-		if (fpss.length > 15) {
+		if (fpss.length > 12) {
 			fpss.shift();
 			mems.shift();
+			ms.shift();
 		}
 
-
 		sparkline.setData(
-			[ 'FPS - ' + fps.toFixed(2), 'Mem - ' + rss.toFixed(2) + 'MB'],
-			[ fpss, mems ]
+			[ 'FPS ' + fps.toFixed(2)
+				, 'Mem ' + rss.toFixed(2) + 'MB'
+				, 'MS ' + ms[ms.length - 1].toFixed(2)],
+			[ fpss
+				, mems
+				, ms ]
 		);
 	}
+
+	last = now;
+	frames = 0;
 }, 1000)
 
 function resize(w, h) {
