@@ -55,8 +55,19 @@ height = 480 * rendering_scale;
 
 // Create a screen object.
 const screen = blessed.screen({
-  smartCSR: true,
-  fullUnicode: true
+	smartCSR: true,
+	useBCE: true,
+	fastCSR: true,
+	autoPadding: true,
+	cursor: {
+		artificial: true,
+		blink: true,
+		shape: 'underline'
+	},
+	fullUnicode: true,
+	// log: `${__dirname}/application.log`,
+    debug: true,
+    dockBorders: true
 });
 
 screen.title = 'Three.js Terminal';
@@ -82,7 +93,8 @@ const box = blessed.box({
 	left: '0',
 	width: 'shrink',
 	height: 'shrink',
-	content: '{bold}Logs{/bold}\n',
+	label: '{bold}Logs{/bold}',
+	content: '',
 	tags: true,
 	border: {
 		type: 'line'
@@ -188,13 +200,14 @@ function render() {
 const start = Date.now();
 
 function log(...args) {
-	box.setContent(
-		box.getContent() +
-		args.join('\t') + '\n');
+	screen.debug(...args);
+	// box.setContent(
+	// 	box.getContent() +
+	// 	args.join('\t') + '\n');
 }
 
 function clearlog() {
-	box.setContent('{bold}Logs{/bold}\n');
+	box.setContent();
 }
 
 mems = []
@@ -223,7 +236,7 @@ setInterval( () => {
 }, 1000);
 
 function resize(w, h) {
-	log('resizing');
+	// screen.debug('resizing', w, h);
 	controls.handleResize();
 	width = w;
 	height = h;
