@@ -1,8 +1,9 @@
 class FPSCounter {
     constructor() {
-        this.fps = [];
-        this.ms = [];
         this.bufferSize = 12;
+        this.fps = new Array(this.bufferSize).fill(0);
+        this.ms = new Array(this.bufferSize).fill(0);
+
         this.then = Date.now();
         this.frames = 0;
     }
@@ -17,13 +18,13 @@ class FPSCounter {
         const fps = this.frames / lapsed * 1000;
         const ms = lapsed / this.frames;
 
-        this.fps.push(fps);
-        this.ms.push(ms);
-        
         if (this.fps.length > this.bufferSize) {
             this.fps.shift();
             this.ms.shift();
         }
+
+        this.fps.push(fps);
+        this.ms.push(ms);
 
         this.frames = 0;
         this.currentFps = fps;
@@ -35,18 +36,20 @@ class FPSCounter {
 
 class MemCounter {
     constructor() {
-        this.data = []
         this.bufferSize = 12;
+        this.data = new Array(this.bufferSize).fill(0);
         this.current;
     }
 
     update() {
         const rss = process.memoryUsage().rss / 1024 / 1024;
         this.current = rss;
-        this.data.push(rss);
+
         if (this.data.length > this.bufferSize) {
             this.data.shift();
         }
+
+        this.data.push(rss);
     }
 }
 

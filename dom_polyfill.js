@@ -32,7 +32,7 @@ module.exports = function(screen) {
         },
 
         emit(...args) {
-            document.emit.call(document, args);
+            document.emit(...args);
         }
     }
 
@@ -94,9 +94,8 @@ module.exports = function(screen) {
     /*
     // This doesn't seem to work so well, so use screen.program
     screen.on('resize', function(e) {
-        console.log('resizing', e);
+        console.error('resizing', e);
     });
-
     */
 
     screen.program.on('resize', e => {
@@ -105,10 +104,10 @@ module.exports = function(screen) {
 
     // Secret Code to get Terminal's Window Pixel Size
     const get_window_pixels = _ => screen.program.manipulateWindow(14, (e, res) => {
-        // console.error('pixel size', res);
         if (e) {
             // This terminal don't support the p 1 4 (window pixel dimension command) :(
             console.error('Terminal does not support pixel dimension');
+            window.emit('resize');
             return;
         }
 

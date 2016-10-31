@@ -17,11 +17,13 @@ const { FPSCounter, MemCounter } = require('./counters');
  * 29 Oct 2016
  *
  * TODOs
- *  - optimize ascii conversion by pull from canvas data
+ *  - optimize ascii conversion by pulling from canvas data (without png conversion)
+ *  - backbuffer screen updates based on network latency?
  *  - try rendering to terminal using drawille / braille characters
  *  - make this runs with more examples! (preferably by automating most stuff)
  *  - add docopts to configure parameters (scale, renderers)
  *  - support webgl and software renderers
+ *  - add key controls to adjust parameters inside the terminal
  *  - profit? :D
  *
  * Kinda done-ish
@@ -137,7 +139,11 @@ function init() {
 	renderer = new THREE.TerminalRenderer(canvas);
 	renderer.setClearColor( 0xf0f0f0 );
 
-	window.addEventListener('resize', (res) => {
+	function onResize(res) {
+		if (!res) {
+			resize(screen.width, screen.height * y_scale);
+			return;
+		}
 		log(`Resized ${screen.program.columns}, ${screen.program.rows}`);
 		const fontWidth = res.width / screen.width;
 		const fontHeight = res.height / screen.height;
@@ -149,7 +155,10 @@ function init() {
 		log(`Rendering using ${width}x${height}px`);
 
 		resize(width, height);
-	});
+	}
+
+	window.addEventListener('resize', onResize);
+	onResize();
 }
 
 function render() {
@@ -192,7 +201,7 @@ fpsCounter = new FPSCounter();
 memCounter = new MemCounter();
 
 setInterval( () => {
-	// clearlog()
+	clearlog()
 	// log('FPS: ' + fps.toFixed(2))
 	fpsCounter.update();
 	memCounter.update();
@@ -210,7 +219,7 @@ setInterval( () => {
 			],
 		dataset
 	);
-}, 1000)
+}, 1000);
 
 function resize(w, h) {
 	log('resizing');
@@ -226,10 +235,6 @@ function saveCanvas() {
 	renderer.saveToFile('./test-out4.png')
 }
 
-
-
-
 const { scene } = require('./scene');
 init();
-resize(screen.width, screen.height * y_scale);
 setInterval(render, 1);
