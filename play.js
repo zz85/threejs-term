@@ -17,13 +17,12 @@ const { FPSCounter, MemCounter } = require('./counters');
  * 29 Oct 2016
  *
  * TODOs
- *  - optimize ascii conversion by pulling from canvas data (without png conversion)
  *  - backbuffer screen updates based on network latency?
  *  - try rendering to terminal using drawille / braille characters
  *  - make this runs with more examples! (preferably by automating most stuff)
  *  - add docopts to configure parameters (scale, renderers)
  *  - support webgl and software renderers
- *  - add key controls to adjust parameters inside the terminal
+ *  - add key controls to adjust parameters inside the terminal (scaling, screenshot, stats, ascii characters)
  *  - try ttystudio
  *  - profit? :D
  *
@@ -41,6 +40,7 @@ const { FPSCounter, MemCounter } = require('./counters');
  *    - Dom Polyfilling
  *    - TerminalRenderer
  *  - add nice fps graphs
+ *  - optimize ascii conversion by pulling from canvas data (without png conversion)
  *
  * Also see,
  *  https://threejs.org/examples/canvas_ascii_effect.html
@@ -48,10 +48,10 @@ const { FPSCounter, MemCounter } = require('./counters');
  *  https://github.com/mrdoob/three.js/issues/2182
  */
 
-let y_scale = 2;
-let rendering_scale = 0.15;
-width = 640 * rendering_scale;
-height = 480 * rendering_scale;
+let y_scale = 1.23; // pixel ratio of a single terminal character height / width
+let pixel_sampling = 1; // mulitplier of target pixels to actual canvas render size
+width = 100;
+height = y_scale * 50;
 
 // Create a screen object.
 const screen = blessed.screen({
@@ -73,7 +73,7 @@ const screen = blessed.screen({
 screen.title = 'Three.js Terminal';
 
 // placeholder for renderering
-const canvas = blessed.image({
+const canvas = blessed.box({ // box image
 	parent: screen,
 	top: 0,
 	left: 0,
@@ -133,6 +133,32 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 	return process.exit(0);
 });
 
+mode = 0;
+
+screen.key(['m'], function(ch, key) {
+	mode = ++mode % 4;
+	let options = {};
+	switch (mode) {
+		case 0:
+			options.plain_formatting = true;
+			break;
+		case 1:
+			options.plain_formatting = false;
+			options.bg_formatting = true;
+			options.ascii_formatting = false;
+			break;
+		case 2:
+			options.bg_formatting = true;
+			options.ascii_formatting = true;
+			break;
+		case 3:
+			options.bg_formatting = false;
+			options.ascii_formatting = true;
+			break;
+	}
+	renderer.setAnsiOptions(options);
+});
+
 // Focus our element.
 canvas.focus();
 box.on('click', clearlog);
@@ -150,24 +176,28 @@ function init() {
 	controls.panSpeed *= 4;
 
 	renderer = new THREE.TerminalRenderer(canvas);
-	renderer.setClearColor( 0xf0f0f0 );
+	// renderer.setClearColor( 0xf0f0f0 );
+	renderer.setClearColor( 0xffffff );
 
 	function onResize(res) {
 		if (!res) {
-			resize(screen.width, screen.height * y_scale);
+			setSize(screen.width, screen.height * y_scale);
 			return;
 		}
-		log(`Resized ${screen.program.columns}, ${screen.program.rows}`);
+		screen.debug(`Resized ${screen.program.columns}, ${screen.program.rows}`);
 		const fontWidth = res.width / screen.width;
 		const fontHeight = res.height / screen.height;
 		y_scale = fontHeight / fontWidth;
-		log(`Estimated font size ${fontWidth.toFixed(3)}x${fontHeight.toFixed(3)}, ratio ${y_scale.toFixed(3)}`);
+		screen.debug(`Estimated font size ${fontWidth.toFixed(3)}x${fontHeight.toFixed(3)}, ratio ${y_scale.toFixed(3)}`);
 
-		width = res.width * rendering_scale | 0;
-		height = res.height * rendering_scale | 0;
-		log(`Rendering using ${width}x${height}px`);
+		const actual_screen_ratio = res.height / res.width;
 
-		resize(width, height);
+		// target pixels to render
+		width = screen.width;
+		height = screen.width * actual_screen_ratio;
+		screen.debug(`Rendering using ${width}x${height}px`);
+
+		setSize(width, height);
 	}
 
 	window.addEventListener('resize', onResize);
@@ -181,6 +211,8 @@ function render() {
 	sphere.position.y = Math.abs( Math.sin( start * 0.002 ) ) * 150;
 	sphere.rotation.x = start * 0.0003;
 	sphere.rotation.z = start * 0.0002;
+
+	scene.rotation.y += 0.005;
 
 	controls.update();
 
@@ -234,14 +266,14 @@ setInterval( () => {
 	);
 }, 1000);
 
-function resize(w, h) {
+function setSize(w, h) {
+	width = w * pixel_sampling | 0;
+	height = h * pixel_sampling | 0;
 	// screen.debug('resizing', w, h, screen.width, screen.height);
 	controls.handleResize();
-	width = w;
-	height = h;
-	camera.aspect = w / h;
+	camera.aspect = width / height;
 	camera.updateProjectionMatrix();
-	renderer.setSize(w, h);
+	renderer.setSize(width, height);
 }
 
 function saveCanvas() {

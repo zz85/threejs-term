@@ -1,3 +1,5 @@
+require('three/examples/js/geometries/TeapotBufferGeometry')
+
 const scene = new THREE.Scene();
 const light1 = new THREE.PointLight( 0xffffff );
 light1.position.set( 500, 500, 500 );
@@ -14,5 +16,8 @@ const plane = new THREE.Mesh( new THREE.PlaneBufferGeometry( 400, 400 ), new THR
 plane.position.y = - 200;
 plane.rotation.x = - Math.PI / 2;
 scene.add( plane );
+
+teapot = require('./teapot');
+// scene.add( teapot );
 
 module.exports = { scene };

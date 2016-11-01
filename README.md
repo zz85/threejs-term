@@ -1,4 +1,4 @@
-# Three.js in the Terminal aka Three.js Terminal Renderer
+# Terminal Renderer for Three.js
 
 This is an example of how you can run three.js in your terminal.
 Sysadmins can now run three.js in remote ssh sessions!
@@ -6,12 +6,23 @@ Sysadmins can now run three.js in remote ssh sessions!
 ![threejs-term](https://cloud.githubusercontent.com/assets/314997/19834595/b96b3e84-9ea0-11e6-950b-5b3103969a9b.gif)
 
 ### Install and Running
-Without Git Clonning. Otherwise look at Development section.
+
+If you prefer to run it by git cloning enviornment, look at the development section.
 
 ```
 $ npm install -g threejs-term # install and link binary
 $ threejs-term # runs the demo
 ```
+
+### Using demo
+
+Keys
+`m` - Toggle Ascii Mode
+`q`, `Ctrl-C`, `Esc` - Quits app.
+`Ctrl-F12` - Developer's console
+`a` - Camera Rotate Mode
+`s` - Camera Scale Mode
+`d` - Camera Position Mode 
 
 ### Troubleshooting
 If npm install fails to compile Canvas bindings to Cario, make sure your system have the [necessary libraries](https://github.com/Automattic/node-canvas).
@@ -23,6 +34,7 @@ For mac homebrew users, you can simply run `brew install cario`.
 - Screen resize detection aka "Responsive Design"!
 - Support mouse events
 - Emulate keypress
+- Toggle different ASCII rendering modes
 
 ### Internals
 This is built with some awesome libraries.
