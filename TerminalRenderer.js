@@ -41,14 +41,11 @@ class TerminalRenderer {
 
     render(scene, camera) {
         this.renderer.render(scene, camera);
-        this.screen.setImage(this.canvas.toBuffer());
+        // this.screen.setImage(this.canvas.toBuffer()); // only for AnsiImage widget // seems to be faster but less configurable
         // console.error(`Size ${this.width},${this.height} ${this.screen.width},${this.screen.height} `);
-        const image = this.ctx.getImageData(0, 0, this.width, this.height);
-        const data = image.data;
-
-        convertToCellMap
-
-        // console.error(image.width, image.height);
+        this.image = this.ctx.getImageData(0, 0, this.width, this.height);
+        const c = ansi.convert(this.image, this.screen.width, this.screen.height)
+        this.screen.setContent(c);
     }
 
     saveRenderToFile(file) {

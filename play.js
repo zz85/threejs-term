@@ -73,7 +73,7 @@ const screen = blessed.screen({
 screen.title = 'Three.js Terminal';
 
 // placeholder for renderering
-const canvas = blessed.image({
+const canvas = blessed.box({ // box image
 	parent: screen,
 	top: 0,
 	left: 0,

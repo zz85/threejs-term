@@ -1,25 +1,14 @@
 // Adopted from blessed/vendor/tng.js
 
+const ascii_only = true;
+const colors = require('blessed/lib/colors');
+const ascii = true;
+
 module.exports = (function() {
-    const colors = require('blessed/lib/colors');
-    const ascii = false;
+    this.colors = colors;
 
     // Taken from libcaca:
     const dchars = '????8@8@#8@8##8#MKXWwz$&%x><\\/xo;+=|^-:i\'.`,  `.        ';
-
-    function renderANSI(bmp) {
-        var out = '';
-
-        bmp.forEach(function(line, y) {
-            line.forEach(function(pixel, x) {
-            var outch = getOutch(pixel);
-            out += pixelToSGR(pixel, outch);
-            });
-            out += '\n';
-        });
-
-        return out;
-    };
 
     function pixelToSGR(pixel, ch) {
         var bga = 1.0
@@ -33,7 +22,7 @@ module.exports = (function() {
             pixel.g * a * bga | 0,
             pixel.b * a * bga | 0);
 
-        if (ch && this.options.ascii) {
+        if (ch && ascii) {
             fg = this.colors.match(
             pixel.r * a * fga | 0,
             pixel.g * a * fga | 0,
@@ -66,5 +55,37 @@ module.exports = (function() {
         return outch;
     }
 
-    return renderANSI;
+    function convert(image, targetWidth, targetHeight) {
+        const { width, height, data } = image;
+        let out = [];
+        let ty, tx, i, pixel, outch;
+        for (let y = 0; y < targetHeight; y++) {
+            ty = y / targetHeight * height | 0;
+            for (let x = 0; x < targetWidth; x++) {
+                tx = x / targetWidth * width | 0;
+                i = ty * width + tx;
+
+                pixel = {
+                    r: data[i * 4 + 0],
+                    g: data[i * 4 + 1],
+                    b: data[i * 4 + 2],
+                    a: data[i * 4 + 0]
+                }
+
+                outch = getOutch(pixel);
+                if (ascii_only) {
+                    out.push(outch);
+                }
+                else {
+                    out.push(pixelToSGR(pixel, outch));
+                }
+            }
+            out.push('\n');
+        }
+        return out.join('');
+    }
+
+    return {
+        convert: convert
+    }
 })();
