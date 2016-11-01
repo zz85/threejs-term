@@ -1,14 +1,30 @@
 // Adopted from blessed/vendor/tng.js
 
-const ascii_only = true;
+const ascii_only = !true;
 const colors = require('blessed/lib/colors');
 const ascii = true;
+const no_bg = true;
+
+// 3 Modules
+// ANSI only - No colors
+// BG COLORS only - No ascii
+// ASCII + BG COLORS + FG Colors
+// ASCII + FG Colors
 
 module.exports = (function() {
     this.colors = colors;
 
+    let dchars;
     // Taken from libcaca:
-    const dchars = '????8@8@#8@8##8#MKXWwz$&%x><\\/xo;+=|^-:i\'.`,  `.        ';
+    dchars = '????8@8@#8@8##8#MKXWwz$&%x><\\/xo;+=|^-:i\'.`,  `.        '.split('').reverse().join('')
+    // dchars = ' .,:;=|iI+hHOE#`$'
+
+    // darker bolder character set from https://github.com/saw/Canvas-ASCII-Art/
+    // dchars = ' .\'`^",:;Il!i~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$'
+    // dchars = ' .:-=+*#%@';
+
+
+    dchars = dchars.split('').reverse().join('');
 
     function pixelToSGR(pixel, ch) {
         var bga = 1.0
@@ -27,7 +43,7 @@ module.exports = (function() {
             pixel.r * a * fga | 0,
             pixel.g * a * fga | 0,
             pixel.b * a * fga | 0);
-            if (a === 0) {
+            if (a === 0 || no_bg) {
             return '\x1b[38;5;' + fg + 'm' + ch + '\x1b[m';
             }
             return '\x1b[38;5;' + fg + 'm\x1b[48;5;' + bg + 'm' + ch + '\x1b[m';

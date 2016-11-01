@@ -17,7 +17,6 @@ const { FPSCounter, MemCounter } = require('./counters');
  * 29 Oct 2016
  *
  * TODOs
- *  - optimize ascii conversion by pulling from canvas data (without png conversion)
  *  - backbuffer screen updates based on network latency?
  *  - try rendering to terminal using drawille / braille characters
  *  - make this runs with more examples! (preferably by automating most stuff)
@@ -41,6 +40,7 @@ const { FPSCounter, MemCounter } = require('./counters');
  *    - Dom Polyfilling
  *    - TerminalRenderer
  *  - add nice fps graphs
+ *  - optimize ascii conversion by pulling from canvas data (without png conversion)
  *
  * Also see,
  *  https://threejs.org/examples/canvas_ascii_effect.html
@@ -150,7 +150,8 @@ function init() {
 	controls.panSpeed *= 4;
 
 	renderer = new THREE.TerminalRenderer(canvas);
-	renderer.setClearColor( 0xf0f0f0 );
+	// renderer.setClearColor( 0xf0f0f0 );
+	renderer.setClearColor( 0xffffff );
 
 	function onResize(res) {
 		if (!res) {
@@ -181,6 +182,8 @@ function render() {
 	sphere.position.y = Math.abs( Math.sin( start * 0.002 ) ) * 150;
 	sphere.rotation.x = start * 0.0003;
 	sphere.rotation.z = start * 0.0002;
+
+	scene.rotation.y += 0.005;
 
 	controls.update();
 
