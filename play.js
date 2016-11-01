@@ -48,10 +48,10 @@ const { FPSCounter, MemCounter } = require('./counters');
  *  https://github.com/mrdoob/three.js/issues/2182
  */
 
-let y_scale = 2;
-let rendering_scale = 0.15;
-width = 640 * rendering_scale;
-height = 480 * rendering_scale;
+let y_scale = 1.23; // pixel ratio of a single terminal character height / width
+let pixel_sampling = 1; // mulitplier of target pixels to actual canvas render size 
+width = 100;
+height = y_scale * 50;
 
 // Create a screen object.
 const screen = blessed.screen({
@@ -155,20 +155,23 @@ function init() {
 
 	function onResize(res) {
 		if (!res) {
-			resize(screen.width, screen.height * y_scale);
+			setSize(screen.width, screen.height * y_scale);
 			return;
 		}
-		log(`Resized ${screen.program.columns}, ${screen.program.rows}`);
+		screen.debug(`Resized ${screen.program.columns}, ${screen.program.rows}`);
 		const fontWidth = res.width / screen.width;
 		const fontHeight = res.height / screen.height;
 		y_scale = fontHeight / fontWidth;
-		log(`Estimated font size ${fontWidth.toFixed(3)}x${fontHeight.toFixed(3)}, ratio ${y_scale.toFixed(3)}`);
+		screen.debug(`Estimated font size ${fontWidth.toFixed(3)}x${fontHeight.toFixed(3)}, ratio ${y_scale.toFixed(3)}`);
 
-		width = res.width * rendering_scale | 0;
-		height = res.height * rendering_scale | 0;
-		log(`Rendering using ${width}x${height}px`);
+		const actual_screen_ratio = res.height / res.width;
 
-		resize(width, height);
+		// target pixels to render
+		width = screen.width;
+		height = screen.width * actual_screen_ratio;
+		screen.debug(`Rendering using ${width}x${height}px`);
+
+		setSize(width, height);
 	}
 
 	window.addEventListener('resize', onResize);
@@ -237,14 +240,14 @@ setInterval( () => {
 	);
 }, 1000);
 
-function resize(w, h) {
+function setSize(w, h) {
+	width = w * pixel_sampling | 0;
+	height = h * pixel_sampling | 0;
 	// screen.debug('resizing', w, h, screen.width, screen.height);
 	controls.handleResize();
-	width = w;
-	height = h;
-	camera.aspect = w / h;
+	camera.aspect = width / height;
 	camera.updateProjectionMatrix();
-	renderer.setSize(w, h);
+	renderer.setSize(width, height);
 }
 
 function saveCanvas() {

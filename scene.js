@@ -10,7 +10,7 @@ light2.position.set( - 500, - 500, - 500 );
 scene.add( light2 );
 
 sphere = new THREE.Mesh( new THREE.SphereGeometry( 200, 20, 10 ), new THREE.MeshLambertMaterial() );
-// scene.add( sphere );
+scene.add( sphere );
 
 const plane = new THREE.Mesh( new THREE.PlaneBufferGeometry( 400, 400 ), new THREE.MeshBasicMaterial( { color: 0xe0e0e0 } ) );
 plane.position.y = - 200;
@@ -18,6 +18,6 @@ plane.rotation.x = - Math.PI / 2;
 scene.add( plane );
 
 teapot = require('./teapot');
-scene.add( teapot );
+// scene.add( teapot );
 
 module.exports = { scene };

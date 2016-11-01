@@ -2,7 +2,7 @@
 
 const colors = require('blessed/lib/colors');
 
-let plain_formatting = !true;
+let plain_formatting = true;
 let ascii_formatting = true;
 let bg_formatting = true;
 
@@ -13,7 +13,7 @@ let bg_formatting = true;
 // ASCII + FG Colors
 
 let dchars;
-let bga = 1.0, fga = 0.9;
+let bga = .2, fga = 0.8;
 
 // Taken from libcaca:
 dchars = '????8@8@#8@8##8#MKXWwz$&%x><\\/xo;+=|^-:i\'.`,  `.        '.split('').reverse().join('')
@@ -21,7 +21,7 @@ dchars = '????8@8@#8@8##8#MKXWwz$&%x><\\/xo;+=|^-:i\'.`,  `.        '.split('').
 // dchars = ' .,:;=|iI+hHOE#`$'
 
 // darker bolder character set from https://github.com/saw/Canvas-ASCII-Art/
-// dchars = ' .\'`^",:;Il!i~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$'
+dchars = ' .\'`^",:;Il!i~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$'
 // dchars = ' .:-=+*#%@';
 
 dchars = dchars.split('').reverse().join('');
@@ -36,12 +36,12 @@ function pixelToSGR(pixel, ch) {
         pixel.g * a * bga | 0,
         pixel.b * a * bga | 0);
 
-    if (ch && !bg_formatting) {
+    if (ch && ascii_formatting) {
         fg = colors.match(
         pixel.r * a * fga | 0,
         pixel.g * a * fga | 0,
         pixel.b * a * fga | 0);
-        if (a === 0 || no_bg) {
+        if (a === 0 || !bg_formatting) {
             return '\x1b[38;5;' + fg + 'm' + ch + '\x1b[m';
         }
         return '\x1b[38;5;' + fg + 'm\x1b[48;5;' + bg + 'm' + ch + '\x1b[m';
