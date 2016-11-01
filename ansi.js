@@ -2,9 +2,15 @@
 
 const colors = require('blessed/lib/colors');
 
-let plain_formatting = true;
-let ascii_formatting = true;
-let bg_formatting = true;
+let options = {
+    plain_formatting: true, // overrides bg and ascii_formatting
+    bg_formatting: true, // colors background
+    ascii_formatting: true, // use ascii for forground
+
+    bga: 1, // background alpha blending
+    fga: 0.5, // forground alpha blending,
+    dchars: ''
+};
 
 // 3 Modules
 // ANSI only - No colors
@@ -12,22 +18,24 @@ let bg_formatting = true;
 // ASCII + BG COLORS + FG Colors
 // ASCII + FG Colors
 
-let dchars;
-let bga = .2, fga = 0.8;
 
 // Taken from libcaca:
-dchars = '????8@8@#8@8##8#MKXWwz$&%x><\\/xo;+=|^-:i\'.`,  `.        '.split('').reverse().join('')
+options.dchars = '????8@8@#8@8##8#MKXWwz$&%x><\\/xo;+=|^-:i\'.`,  `.        '.split('').reverse().join('')
 
-// dchars = ' .,:;=|iI+hHOE#`$'
+// options.dchars = ' .,:;=|iI+hHOE#`$'
 
 // darker bolder character set from https://github.com/saw/Canvas-ASCII-Art/
-dchars = ' .\'`^",:;Il!i~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$'
-// dchars = ' .:-=+*#%@';
+// options.dchars = ' .\'`^",:;Il!i~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$'
+// options.dchars = ' .:-=+*#%@';
+// options.dchars = '●☭☮☯♔♛♙♞';
+// options.dchars = '█▓▒░ '
 
-dchars = dchars.split('').reverse().join('');
+options.dchars = options.dchars.split('').reverse().join('');
 
 function pixelToSGR(pixel, ch) {
     var a = pixel.a / 255
+        , bga = options.bga
+        , fga = options.fga
         , bg
         , fg;
 
@@ -36,12 +44,12 @@ function pixelToSGR(pixel, ch) {
         pixel.g * a * bga | 0,
         pixel.b * a * bga | 0);
 
-    if (ch && ascii_formatting) {
+    if (options.ascii_formatting && ch) {
         fg = colors.match(
         pixel.r * a * fga | 0,
         pixel.g * a * fga | 0,
         pixel.b * a * fga | 0);
-        if (a === 0 || !bg_formatting) {
+        if (a === 0 || !options.bg_formatting) {
             return '\x1b[38;5;' + fg + 'm' + ch + '\x1b[m';
         }
         return '\x1b[38;5;' + fg + 'm\x1b[48;5;' + bg + 'm' + ch + '\x1b[m';
@@ -64,6 +72,7 @@ function luminance(pixel) {
 
 function getOutch(pixel) {
     var lumi = luminance(pixel)
+    , dchars = options.dchars
     , outch = dchars[lumi * (dchars.length - 1) | 0];
 
     return outch;
@@ -87,7 +96,7 @@ function convert(image, targetWidth, targetHeight) {
             };
 
             outch = getOutch(pixel);
-            if (plain_formatting) {
+            if (options.plain_formatting) {
                 out.push(outch);
             }
             else {
@@ -101,10 +110,7 @@ function convert(image, targetWidth, targetHeight) {
 
 module.exports = {
     convert: convert,
-    setFormatting(f) {
-        plain_formatting = f
-    },
-    setPalatte(p) {
-        dchars = p;
+    setOptions(o) {
+        Object.assign(options, o);
     },
 };

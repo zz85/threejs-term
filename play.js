@@ -22,7 +22,7 @@ const { FPSCounter, MemCounter } = require('./counters');
  *  - make this runs with more examples! (preferably by automating most stuff)
  *  - add docopts to configure parameters (scale, renderers)
  *  - support webgl and software renderers
- *  - add key controls to adjust parameters inside the terminal
+ *  - add key controls to adjust parameters inside the terminal (scaling, screenshot, stats, ascii characters)
  *  - try ttystudio
  *  - profit? :D
  *
@@ -49,7 +49,7 @@ const { FPSCounter, MemCounter } = require('./counters');
  */
 
 let y_scale = 1.23; // pixel ratio of a single terminal character height / width
-let pixel_sampling = 1; // mulitplier of target pixels to actual canvas render size 
+let pixel_sampling = 1; // mulitplier of target pixels to actual canvas render size
 width = 100;
 height = y_scale * 50;
 
@@ -131,6 +131,32 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 	// screen.flush();
 	// Maybe, send Ctrl-C to it's own process instead
 	return process.exit(0);
+});
+
+mode = 0;
+
+screen.key(['m'], function(ch, key) {
+	mode = ++mode % 4;
+	let options = {};
+	switch (mode) {
+		case 0:
+			options.plain_formatting = true;
+			break;
+		case 1:
+			options.plain_formatting = false;
+			options.bg_formatting = true;
+			options.ascii_formatting = false;
+			break;
+		case 2:
+			options.bg_formatting = true;
+			options.ascii_formatting = true;
+			break;
+		case 3:
+			options.bg_formatting = false;
+			options.ascii_formatting = true;
+			break;
+	}
+	renderer.setAnsiOptions(options);
 });
 
 // Focus our element.

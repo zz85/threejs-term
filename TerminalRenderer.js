@@ -48,6 +48,10 @@ class TerminalRenderer {
         this.screen.setContent(c);
     }
 
+    setAnsiOptions(o) {
+        ansi.setOptions(o);
+    }
+
     saveRenderToFile(file) {
         // Write canvas to file
         const out = fs.createWriteStream(file);
