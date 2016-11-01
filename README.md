@@ -7,7 +7,7 @@ Sysadmins can now run three.js in remote ssh sessions!
 
 ### Install and Running
 
-If you prefer to run it by git cloning enviornment, look at the development section.
+If you prefer to run it by git cloning environment, look at the development section.
 
 ```
 $ npm install -g threejs-term # install and link binary
@@ -16,12 +16,20 @@ $ threejs-term # runs the demo
 
 ### Using demo
 
-Keys
+![output2](https://cloud.githubusercontent.com/assets/314997/19897356/b3dd03dc-a092-11e6-9394-9600a5522852.gif)
+
+#### Keys
+
 `m` - Toggle Ascii Mode
+
 `q`, `Ctrl-C`, `Esc` - Quits app.
+
 `Ctrl-F12` - Developer's console
+
 `a` - Camera Rotate Mode
+
 `s` - Camera Scale Mode
+
 `d` - Camera Position Mode 
 
 ### Troubleshooting
