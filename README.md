@@ -3,20 +3,9 @@
 This is an example of how you can run three.js in your terminal.
 Sysadmins can now run three.js in remote ssh sessions!
 
-![threejs-term](https://cloud.githubusercontent.com/assets/314997/19834595/b96b3e84-9ea0-11e6-950b-5b3103969a9b.gif)
-
-### Install and Running
-
-If you prefer to run it by git cloning environment, look at the development section.
-
-```
-$ npm install -g threejs-term # install and link binary
-$ threejs-term # runs the demo
-```
-
 ### Using demo
 
-![output2](https://cloud.githubusercontent.com/assets/314997/19897356/b3dd03dc-a092-11e6-9394-9600a5522852.gif)
+![threejs-term](https://cloud.githubusercontent.com/assets/314997/19897356/b3dd03dc-a092-11e6-9394-9600a5522852.gif)
 
 #### Keys
 
@@ -31,6 +20,15 @@ $ threejs-term # runs the demo
 `s` - Camera Scale Mode
 
 `d` - Camera Position Mode 
+
+### Install and Running
+
+If you prefer to run it by git cloning environment, look at the development section.
+
+```
+$ npm install -g threejs-term # install and link binary
+$ threejs-term # runs the demo
+```
 
 ### Troubleshooting
 If npm install fails to compile Canvas bindings to Cario, make sure your system have the [necessary libraries](https://github.com/Automattic/node-canvas).
