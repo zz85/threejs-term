@@ -10,7 +10,7 @@ light2.position.set( - 500, - 500, - 500 );
 scene.add( light2 );
 
 sphere = new THREE.Mesh( new THREE.SphereGeometry( 200, 20, 10 ), new THREE.MeshLambertMaterial() );
-scene.add( sphere );
+// scene.add( sphere );
 
 const plane = new THREE.Mesh( new THREE.PlaneBufferGeometry( 400, 400 ), new THREE.MeshBasicMaterial( { color: 0xe0e0e0 } ) );
 plane.position.y = - 200;
@@ -19,5 +19,16 @@ scene.add( plane );
 
 teapot = require('./teapot');
 // scene.add( teapot );
+
+var geometry = new THREE.BoxGeometry( 200, 200, 200 );
+for ( var i = 0; i < geometry.faces.length; i += 2 ) {
+    var hex = Math.random() * 0xffffff;
+    geometry.faces[ i ].color.setHex( hex );
+    geometry.faces[ i + 1 ].color.setHex( hex );
+}
+var material = new THREE.MeshBasicMaterial( { vertexColors: THREE.FaceColors, overdraw: 0.5 } );
+cube = new THREE.Mesh( geometry, material );
+cube.position.y = 150;
+scene.add( cube );
 
 module.exports = { scene };
