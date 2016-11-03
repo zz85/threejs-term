@@ -14,12 +14,71 @@ require('three/examples/js/renderers/CanvasRenderer');
 
 const ansi = require('./ansi');
 
+class SoftwareCanvas {
+    constructor() {
+        this.style = {};
+    }
+
+    set width(w) {
+        this._width = w;
+    }
+
+    set height(h) {
+        this._height = h;
+    }
+
+    getContext() {
+        const proxy = new Proxy(this, {
+            get: function (object, property, proxy) {
+                if (property in object) {
+                    return object[property];
+                }
+
+                console.error('Trapped get',  property);
+                return null;
+            },
+
+            set: function(object, property, value, proxy) {
+                if (!(property in object)) {
+                    console.error('Trapped set',  property, value);
+                }
+
+                object[property] = value;
+                return object[property];
+            }
+        });
+
+        return proxy;
+    }
+
+    fillRect(x, y, w, h) {
+        console.error('implement fillRect()')
+    }
+
+    getImageData(sx, sy, sw, sh) {
+        const result = {
+            data: [],
+            width: sw,
+            height:sh
+        }
+        return result;
+    }
+
+    putImageData(imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight) {
+        console.error('implement putImageData()')
+    }
+}
+
+
 class TerminalRenderer {
     constructor(screen) {
         this.screen = screen;
         // Set up fake canvas
-        const canvas = new Canvas(400, 300);
+        // const canvas = new Canvas(400, 300);
         // const canvas = new DrawilleCanvas.Canvas(120, 60);
+
+
+        const canvas = new SoftwareCanvas();
         canvas.style = {};
 
         const params = {
@@ -28,8 +87,8 @@ class TerminalRenderer {
 
         this.ctx = canvas.getContext('2d');
 
-        // const renderer = new THREE.SoftwareRenderer(params); // TODO pass in raw arrays and render that instead
-        const renderer = new THREE.CanvasRenderer(params);
+        const renderer = new THREE.SoftwareRenderer(params); // TODO pass in raw arrays and render that instead
+        // const renderer = new THREE.CanvasRenderer(params);
         this.canvas = canvas;
         this.renderer = renderer;
     }
