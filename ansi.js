@@ -92,7 +92,7 @@ function convert(image, targetWidth, targetHeight) {
                 r: data[i * 4 + 0],
                 g: data[i * 4 + 1],
                 b: data[i * 4 + 2],
-                a: data[i * 4 + 0]
+                a: data[i * 4 + 3]
             };
 
             outch = getOutch(pixel);

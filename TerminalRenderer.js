@@ -60,6 +60,7 @@ class SoftwareCanvas {
     fillRect(sx, sy, w, h) {
         // console.error('implement fillRect()')
         const [r, g, b, a] = this._parseStyle(this.fillStyle);
+        const a1 = a / 255;
         for (let j = 0; j < h; j++) {
             for (let i = 0; i < w; i++) {
                 const x = i + sx;
@@ -67,9 +68,9 @@ class SoftwareCanvas {
 
                 const si = (y * this._width + x) * 4;
                 // TODO Need to blend!!!
-                this._data[si + 0] = r;
-                this._data[si + 1] = g;
-                this._data[si + 2] = b;
+                this._data[si + 0] = r * a1;
+                this._data[si + 1] = g * a1;
+                this._data[si + 2] = b * a1;
                 this._data[si + 3] = a;
             }
         }
@@ -107,9 +108,10 @@ class SoftwareCanvas {
 
                 const source = (y * this._width + x) * 4;
                 const dest = (j * sw + i) * 4;
-                data[dest + 0] = this._data[source + 0];
-                data[dest + 1] = this._data[source + 1];
-                data[dest + 2] = this._data[source + 2];
+                const a = this._data[source + 3] / 255;
+                data[dest + 0] = this._data[source + 0] * a;
+                data[dest + 1] = this._data[source + 1] * a;
+                data[dest + 2] = this._data[source + 2] * a;
                 data[dest + 3] = this._data[source + 3];
             }
         }
@@ -131,10 +133,10 @@ class SoftwareCanvas {
             for (let x = 0; x < dirtyWidth; x++) {
                 const tx = dirtyX + x;
                 const ty = dirtyY + y;
+                const source = (ty * imageData.width + tx) * 4;
+
                 const sx = dx + x;
                 const sy = dy + y;
-
-                const source = (ty * imageData.width + tx) * 4;
                 const dest = (sy * this._width + sx) * 4;
                 this._data[dest + 0] = data[source + 0];
                 this._data[dest + 1] = data[source + 1];
@@ -150,10 +152,9 @@ class TerminalRenderer {
     constructor(screen) {
         this.screen = screen;
         // Set up fake canvas
-        // const canvas = new Canvas(400, 300);
+        const canvas = new Canvas();
         // const canvas = new DrawilleCanvas.Canvas(120, 60);
-
-        const canvas = new SoftwareCanvas();
+        // const canvas = new SoftwareCanvas();
         canvas.style = {};
 
         const params = {
@@ -162,8 +163,8 @@ class TerminalRenderer {
 
         this.ctx = canvas.getContext('2d');
 
-        const renderer = new THREE.SoftwareRenderer(params); // TODO pass in raw arrays and render that instead
-        // const renderer = new THREE.CanvasRenderer(params);
+        // const renderer = new THREE.SoftwareRenderer(params); // TODO pass in raw arrays and render that instead
+        const renderer = new THREE.CanvasRenderer(params);
         this.canvas = canvas;
         this.renderer = renderer;
     }
@@ -185,6 +186,7 @@ class TerminalRenderer {
 
         this.image = this.ctx.getImageData(0, 0, this.width, this.height);
         const c = ansi.convert(this.image, this.screen.width, this.screen.height)
+        // console.error('render', this.screen.width, this.screen.height)
 
         // const c = this.ctx.canvas.frame();
         this.screen.setContent(c);
