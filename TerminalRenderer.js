@@ -21,10 +21,16 @@ class SoftwareCanvas {
 
     set width(w) {
         this._width = w;
+        this._resize()
     }
 
     set height(h) {
         this._height = h;
+        this._resize()
+    }
+
+    _resize() {
+        this._data = new Uint8ClampedArray(this._width * this._height * 4);
     }
 
     getContext() {
@@ -51,21 +57,68 @@ class SoftwareCanvas {
         return proxy;
     }
 
-    fillRect(x, y, w, h) {
-        console.error('implement fillRect()')
+    fillRect(sx, sy, w, h) {
+        // console.error('implement fillRect()')
+        const [r, g, b, a] = this._parseStyle(this.fillStyle);
+
+        for (let j = 0; j < h; j++) {
+            for (let i = 0; i < w; i++) {
+                const x = i + sx;
+                const y = j + sy;
+
+                const si = (y * this._width + x) * 4;
+                // TODO Need to blend!!!
+                this._data[si + 0] = r;
+                this._data[si + 1] = g;
+                this._data[si + 2] = b;
+                this._data[si + 3] = a;
+            }
+        }
     }
 
+    _parseStyle(s) {
+        const RGBA = /rgba\s*\(\s*(\d+)[ ,]+(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/
+        const match = RGBA.exec(s);
+        if (match)
+            return match.slice(1);
+        else
+            console.error(s);
+        return [0, 0, 0, 0];
+    }
+
+    /*
+    set fillStyle(x) {
+
+    }*/
+
     getImageData(sx, sy, sw, sh) {
+        const data = new Uint8ClampedArray(sw, sh);
+        // TODO this doesn't check boundary conditions!
+
+        for (let j = 0; j < sh; j++) {
+            for (let i = 0; i < sw; i++) {
+                const x = sx + i;
+                const y = sy + j;
+
+                const source = (y * this._width + x) * 4;
+                const dest = (j * sw + i) * 4;
+                data[dest + 0] = this._data[source + 0];
+                data[dest + 1] = this._data[source + 1];
+                data[dest + 2] = this._data[source + 2];
+                data[dest + 3] = this._data[source + 3];
+            }
+        }
+
         const result = {
-            data: [],
+            data: data,
             width: sw,
-            height:sh
+            height: sh
         }
         return result;
     }
 
     putImageData(imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight) {
-        console.error('implement putImageData()')
+        // console.error('implement putImageData()')
     }
 }
 
