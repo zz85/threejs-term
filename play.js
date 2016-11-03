@@ -176,8 +176,8 @@ function init() {
 	controls.panSpeed *= 4;
 
 	renderer = new THREE.TerminalRenderer(canvas);
-	// renderer.setClearColor( 0xf0f0f0 );
-	renderer.setClearColor( 0xffffff );
+	renderer.setClearColor( 0xf0f0f0 );
+	// renderer.setClearColor( 0xffffff );
 
 	function onResize(res) {
 		if (!res) {

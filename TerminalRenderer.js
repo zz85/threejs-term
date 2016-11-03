@@ -8,7 +8,6 @@ require('three/examples/js/renderers/Projector');
 require('three/examples/js/renderers/SoftwareRenderer');
 require('three/examples/js/renderers/CanvasRenderer');
 
-// TODO use a proxy class?
 // TODO support WebGLRenderer via headless-gl or node-webgl?
 // TODO move terminal dimensions to pixel dimensions conversion here
 
@@ -34,6 +33,7 @@ class SoftwareCanvas {
     }
 
     getContext() {
+        // Use proxy to trap unhandled messages
         const proxy = new Proxy(this, {
             get: function (object, property, proxy) {
                 if (property in object) {
@@ -60,7 +60,6 @@ class SoftwareCanvas {
     fillRect(sx, sy, w, h) {
         // console.error('implement fillRect()')
         const [r, g, b, a] = this._parseStyle(this.fillStyle);
-
         for (let j = 0; j < h; j++) {
             for (let i = 0; i < w; i++) {
                 const x = i + sx;
@@ -77,12 +76,18 @@ class SoftwareCanvas {
     }
 
     _parseStyle(s) {
-        const RGBA = /rgba\s*\(\s*(\d+)[ ,]+(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/
-        const match = RGBA.exec(s);
+        const RGB = /rgb\s*\(\s*(\d+)[ ,]+(\d+)[ ,]+(\d+)\s*\)/
+        let match = RGB.exec(s);
+        if (match) {
+            return [...match.slice(1), 255];
+        }
+
+        const RGBA = /rgba\s*\(\s*(\d+)[ ,]+(\d+)[ ,]+(\d+)[ ,]+(\d+)\s*\)/
+        match = RGBA.exec(s);
         if (match)
             return match.slice(1);
-        else
-            console.error(s);
+        elsef
+            console.error('Cannot parse', s);
         return [0, 0, 0, 0];
     }
 
@@ -92,7 +97,7 @@ class SoftwareCanvas {
     }*/
 
     getImageData(sx, sy, sw, sh) {
-        const data = new Uint8ClampedArray(sw, sh);
+        const data = new Uint8ClampedArray(sw * sh * 4);
         // TODO this doesn't check boundary conditions!
 
         for (let j = 0; j < sh; j++) {
@@ -118,7 +123,25 @@ class SoftwareCanvas {
     }
 
     putImageData(imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight) {
+        // imagedata, 0, 0, x, y, width, height
         // console.error('implement putImageData()')
+        const data = imageData.data;
+
+        for (let y = 0; y < dirtyHeight; y++) {
+            for (let x = 0; x < dirtyWidth; x++) {
+                const tx = dirtyX + x;
+                const ty = dirtyY + y;
+                const sx = dx + x;
+                const sy = dy + y;
+
+                const source = (ty * imageData.width + tx) * 4;
+                const dest = (sy * this._width + sx) * 4;
+                this._data[dest + 0] = data[source + 0];
+                this._data[dest + 1] = data[source + 1];
+                this._data[dest + 2] = data[source + 2];
+                this._data[dest + 3] = data[source + 3];
+            }
+        }
     }
 }
 
@@ -129,7 +152,6 @@ class TerminalRenderer {
         // Set up fake canvas
         // const canvas = new Canvas(400, 300);
         // const canvas = new DrawilleCanvas.Canvas(120, 60);
-
 
         const canvas = new SoftwareCanvas();
         canvas.style = {};
