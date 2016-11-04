@@ -12,18 +12,17 @@ let options = {
     dchars: ''
 };
 
-// 3 Modules
-// ANSI only - No colors
-// BG COLORS only - No ascii
-// ASCII + BG COLORS + FG Colors
-// ASCII + FG Colors
-
-
 // Taken from libcaca:
 options.dchars = '????8@8@#8@8##8#MKXWwz$&%x><\\/xo;+=|^-:i\'.`,  `.        '.split('').reverse().join('')
 
-// options.dchars = ' .,:;=|iI+hHOE#`$'
+// TODO fix non fixed with chinese / japanese unicode characters
+// TODO implement emojis
+// options.dchars = '    一二三四五吖雅'
 
+// Jem's ascii characters
+// options.dchars = '  .o-~=*%@#';
+
+// options.dchars = ' .,:;=|iI+hHOE#`$'
 // darker bolder character set from https://github.com/saw/Canvas-ASCII-Art/
 // options.dchars = ' .\'`^",:;Il!i~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$'
 // options.dchars = ' .:-=+*#%@';
@@ -92,7 +91,7 @@ function convert(image, targetWidth, targetHeight) {
                 r: data[i * 4 + 0],
                 g: data[i * 4 + 1],
                 b: data[i * 4 + 2],
-                a: data[i * 4 + 0]
+                a: data[i * 4 + 3]
             };
 
             outch = getOutch(pixel);

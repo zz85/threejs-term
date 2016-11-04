@@ -1,20 +1,28 @@
 const fs = require('fs');
 const Canvas = require('canvas');
 
+const DrawilleCanvas = require('drawille-canvas');
+// const DrawilleCanvas = require('drawille-canvas-blessed-contrib');
+const SoftwareCanvas = require('./SoftwareCanvas')
+
 require('three/examples/js/renderers/Projector');
-// require('three/examples/js/renderers/SoftwareRenderer');
+require('three/examples/js/renderers/SoftwareRenderer');
 require('three/examples/js/renderers/CanvasRenderer');
 
-// TODO use a proxy class?
 // TODO support WebGLRenderer via headless-gl or node-webgl?
+// TODO move terminal dimensions to pixel dimensions conversion here
 
 const ansi = require('./ansi');
+
+
 
 class TerminalRenderer {
     constructor(screen) {
         this.screen = screen;
         // Set up fake canvas
-        const canvas = new Canvas()
+        // const canvas = new Canvas();
+        // const canvas = new DrawilleCanvas.Canvas(120, 60);
+        const canvas = new SoftwareCanvas();
         canvas.style = {};
 
         const params = {
@@ -23,8 +31,8 @@ class TerminalRenderer {
 
         this.ctx = canvas.getContext('2d');
 
-        // renderer = new THREE.SoftwareRenderer(params); // TODO pass in raw arrays and render that instead
-        const renderer = new THREE.CanvasRenderer(params);
+        const renderer = new THREE.SoftwareRenderer(params); // TODO pass in raw arrays and render that instead
+        // const renderer = new THREE.CanvasRenderer(params);
         this.canvas = canvas;
         this.renderer = renderer;
     }
@@ -43,8 +51,11 @@ class TerminalRenderer {
         this.renderer.render(scene, camera);
         // this.screen.setImage(this.canvas.toBuffer()); // only for AnsiImage widget // seems to be faster but less configurable
         // console.error(`Size ${this.width},${this.height} ${this.screen.width},${this.screen.height} `);
+
         this.image = this.ctx.getImageData(0, 0, this.width, this.height);
         const c = ansi.convert(this.image, this.screen.width, this.screen.height)
+
+        // const c = this.ctx.canvas.frame();
         this.screen.setContent(c);
     }
 
@@ -52,7 +63,7 @@ class TerminalRenderer {
         ansi.setOptions(o);
     }
 
-    saveRenderToFile(file) {
+    saveRenderToFile(canvas, file) {
         // Write canvas to file
         const out = fs.createWriteStream(file);
         return canvas.pngStream().pipe(out);
