@@ -68,9 +68,9 @@ class SoftwareCanvas {
 
                 const si = (y * this._width + x) * 4;
                 // TODO Need to blend!!!
-                this._data[si + 0] = r * a1;
-                this._data[si + 1] = g * a1;
-                this._data[si + 2] = b * a1;
+                this._data[si + 0] = r * a1 | 0;
+                this._data[si + 1] = g * a1 | 0;
+                this._data[si + 2] = b * a1 | 0;
                 this._data[si + 3] = a;
             }
         }
@@ -108,10 +108,9 @@ class SoftwareCanvas {
 
                 const source = (y * this._width + x) * 4;
                 const dest = (j * sw + i) * 4;
-                const a = this._data[source + 3] / 255;
-                data[dest + 0] = this._data[source + 0] * a;
-                data[dest + 1] = this._data[source + 1] * a;
-                data[dest + 2] = this._data[source + 2] * a;
+                data[dest + 0] = this._data[source + 0];
+                data[dest + 1] = this._data[source + 1];
+                data[dest + 2] = this._data[source + 2];
                 data[dest + 3] = this._data[source + 3];
             }
         }
@@ -135,26 +134,26 @@ class SoftwareCanvas {
                 const ty = dirtyY + y;
                 const source = (ty * imageData.width + tx) * 4;
 
-                const sx = dx + x;
-                const sy = dy + y;
+                const sx = dx + x + dirtyX;
+                const sy = dy + y + dirtyY;
                 const dest = (sy * this._width + sx) * 4;
-                this._data[dest + 0] = data[source + 0];
-                this._data[dest + 1] = data[source + 1];
-                this._data[dest + 2] = data[source + 2];
-                this._data[dest + 3] = data[source + 3];
+                const a = this._data[source + 3] / 255;
+                this._data[dest + 0] = data[source + 0] * a | 0;
+                this._data[dest + 1] = data[source + 1] * a | 0;
+                this._data[dest + 2] = data[source + 2] * a | 0;
+                this._data[dest + 3] *= data[source + 3] | 0;
             }
         }
     }
 }
 
-
 class TerminalRenderer {
     constructor(screen) {
         this.screen = screen;
         // Set up fake canvas
-        const canvas = new Canvas();
+        // const canvas = new Canvas();
         // const canvas = new DrawilleCanvas.Canvas(120, 60);
-        // const canvas = new SoftwareCanvas();
+        const canvas = new SoftwareCanvas();
         canvas.style = {};
 
         const params = {
@@ -163,16 +162,21 @@ class TerminalRenderer {
 
         this.ctx = canvas.getContext('2d');
 
-        // const renderer = new THREE.SoftwareRenderer(params); // TODO pass in raw arrays and render that instead
-        const renderer = new THREE.CanvasRenderer(params);
+        const renderer = new THREE.SoftwareRenderer(params); // TODO pass in raw arrays and render that instead
+        // const renderer = new THREE.CanvasRenderer(params);
         this.canvas = canvas;
         this.renderer = renderer;
+
+        this.normalCanvas = new Canvas();
+        this.normalCtx = this.normalCanvas.getContext('2d');
     }
 
     setSize(w, h) {
         this.width = w;
         this.height = h;
         this.renderer.setSize(w, h);
+        this.normalCanvas.width = w;
+        this.normalCanvas.height = h;
     }
 
     setClearColor(c) {
@@ -190,13 +194,20 @@ class TerminalRenderer {
 
         // const c = this.ctx.canvas.frame();
         this.screen.setContent(c);
+
+        // const tmp = this.normalCtx.getImageData(0, 0, this.width, this.height);
+        // for (let i = 0; i < tmp.data.length; i++) {
+        //     tmp.data[i] = this.image.data[i];
+        // }
+        // this.normalCtx.putImageData(tmp, 0, 0, 0, 0, this.width, this.height);
+        // this.saveRenderToFile(this.normalCanvas, 'test.png');
     }
 
     setAnsiOptions(o) {
         ansi.setOptions(o);
     }
 
-    saveRenderToFile(file) {
+    saveRenderToFile(canvas, file) {
         // Write canvas to file
         const out = fs.createWriteStream(file);
         return canvas.pngStream().pipe(out);

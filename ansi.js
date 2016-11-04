@@ -20,7 +20,13 @@ let options = {
 
 
 // Taken from libcaca:
-options.dchars = '????8@8@#8@8##8#MKXWwz$&%x><\\/xo;+=|^-:i\'.`,  `.        '.split('').reverse().join('')
+// TODO fix non fixed with chinese / japanese unicode characters
+// TODO implement emojis
+// options.dchars = '    一二三四五吖雅'
+// options.dchars = '????8@8@#8@8##8#MKXWwz$&%x><\\/xo;+=|^-:i\'.`,  `.        '.split('').reverse().join('')
+
+// Jem's ascii characters
+options.dchars = '  .o-~=*%@#';
 
 // options.dchars = ' .,:;=|iI+hHOE#`$'
 
