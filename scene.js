@@ -9,7 +9,7 @@ const light2 = new THREE.PointLight( 0xffffff, 0.25 );
 light2.position.set( - 500, - 500, - 500 );
 scene.add( light2 );
 
-sphere = new THREE.Mesh( new THREE.SphereGeometry( 200, 20, 10 ), new THREE.MeshLambertMaterial() );
+sphere = new THREE.Mesh( new THREE.SphereGeometry( 200, 20, 10 ), new THREE.MeshLambertMaterial({ wireframe: true, color: 0x9900ee}) );
 scene.add( sphere );
 
 const plane = new THREE.Mesh( new THREE.PlaneBufferGeometry( 400, 400 ), new THREE.MeshBasicMaterial( { color: 0xe0e0e0 } ) );

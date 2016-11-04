@@ -33,7 +33,9 @@ class SoftwareCanvas {
     }
 
     getContext() {
-        // Use proxy to trap unhandled messages
+        return this;
+
+        // Use proxy to trap unhandled messages for development purposes
         const proxy = new Proxy(this, {
             get: function (object, property, proxy) {
                 if (property in object) {
@@ -124,8 +126,6 @@ class SoftwareCanvas {
     }
 
     putImageData(imageData, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight) {
-        // imagedata, 0, 0, x, y, width, height
-        // console.error('implement putImageData()')
         const data = imageData.data;
 
         for (let y = 0; y < dirtyHeight; y++) {
@@ -166,17 +166,12 @@ class TerminalRenderer {
         // const renderer = new THREE.CanvasRenderer(params);
         this.canvas = canvas;
         this.renderer = renderer;
-
-        this.normalCanvas = new Canvas();
-        this.normalCtx = this.normalCanvas.getContext('2d');
     }
 
     setSize(w, h) {
         this.width = w;
         this.height = h;
         this.renderer.setSize(w, h);
-        this.normalCanvas.width = w;
-        this.normalCanvas.height = h;
     }
 
     setClearColor(c) {
@@ -190,17 +185,9 @@ class TerminalRenderer {
 
         this.image = this.ctx.getImageData(0, 0, this.width, this.height);
         const c = ansi.convert(this.image, this.screen.width, this.screen.height)
-        // console.error('render', this.screen.width, this.screen.height)
 
         // const c = this.ctx.canvas.frame();
         this.screen.setContent(c);
-
-        // const tmp = this.normalCtx.getImageData(0, 0, this.width, this.height);
-        // for (let i = 0; i < tmp.data.length; i++) {
-        //     tmp.data[i] = this.image.data[i];
-        // }
-        // this.normalCtx.putImageData(tmp, 0, 0, 0, 0, this.width, this.height);
-        // this.saveRenderToFile(this.normalCanvas, 'test.png');
     }
 
     setAnsiOptions(o) {
