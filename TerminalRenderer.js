@@ -2,7 +2,7 @@ const fs = require('fs');
 const Canvas = require('canvas');
 
 const DrawilleCanvas = require('drawille');
-// const DrawilleCanvas = require('drawille-canvas-blessed-contrib');
+const TerminalCanvas = require('drawille-canvas-blessed-contrib');
 const SoftwareCanvas = require('./SoftwareCanvas');
 
 require('three/examples/js/renderers/Projector');
@@ -33,7 +33,7 @@ class TerminalRenderer {
         this.canvas = canvas;
         this.renderer = renderer;
 
-        this.drawille = new DrawilleCanvas();
+        this.drawille = new TerminalCanvas(2, 4, DrawilleCanvas);
     }
 
     setSize(w, h) {
@@ -74,11 +74,15 @@ class TerminalRenderer {
         const sh = image.height;
         const data = image.data;
 
-        const drawille = this.drawille;
+        const drawille = this.drawille.canvas;
         drawille.width = tw;
         drawille.height = th;
+        const ctx = this.drawille;
+        ctx.width = tw;
+        ctx.height = th;
 
-        drawille.clear();
+        // drawille.clear();
+        ctx.clearRect(0, 0, tw, th)
 
         let tx, ty, p, r, g, b, a, intensity;
         for (let y = 0; y < th; y++) {
@@ -93,7 +97,9 @@ class TerminalRenderer {
                 a = data[p + 3] / 255;
 
                 intensity = (0.2126 * r + 0.7152 * g + 0.0722 * b) * a;
-                if (intensity < 0.9) drawille.set(x, y);
+                // if (intensity < 0.9) drawille.set(x, y);
+                ctx.fillStyle = `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a * 255})`;
+                ctx.fillRect(tx, ty, 1, 1);
             }
         }
 
