@@ -119,6 +119,11 @@ class TerminalRenderer {
         this.setSize(this.width, this.height);
     }
 
+    setPixelScale(s) {
+        this.pixel_sampling = s;
+        this.setSize(this.width, this.height);
+    }
+
     saveRenderToFile(canvas, file) {
         // Write canvas to file
         const out = fs.createWriteStream(file);

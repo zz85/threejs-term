@@ -168,6 +168,18 @@ screen.key(['b'], function(ch, key) {
 	renderer.setBrailleMode(braille);
 });
 
+pixelScale = 1;
+screen.key(['p'], function(ch, key) {
+	pixelScale *= 2;
+	if (pixelScale > 8) pixelScale = 0.25;
+	// pixelScale = pixelScale == 1 ? 2 :
+	// 	pixelScale == 2 ? 0.5 : 1;
+	// console.error('pixelScale', pixelScale);
+	renderer.setPixelScale(pixelScale);
+});
+
+
+
 // Focus our element.
 canvas.focus();
 box.on('click', clearlog);
