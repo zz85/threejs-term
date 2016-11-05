@@ -159,6 +159,13 @@ screen.key(['m'], function(ch, key) {
 	renderer.setAnsiOptions(options);
 });
 
+braille = false;
+
+screen.key(['b'], function(ch, key) {
+	braille = !braille;
+	renderer.setBrailleMode(braille);
+});
+
 // Focus our element.
 canvas.focus();
 box.on('click', clearlog);

@@ -2,7 +2,6 @@ const fs = require('fs');
 const Canvas = require('canvas');
 
 const DrawilleCanvas = require('drawille');
-const TerminalCanvas = require('drawille-canvas-blessed-contrib');
 const SoftwareCanvas = require('./SoftwareCanvas');
 
 require('three/examples/js/renderers/Projector');
@@ -33,7 +32,7 @@ class TerminalRenderer {
         this.canvas = canvas;
         this.renderer = renderer;
 
-        this.drawille = new TerminalCanvas(2, 4, DrawilleCanvas);
+        this.drawille = new DrawilleCanvas();
     }
 
     setSize(w, h) {
@@ -56,11 +55,15 @@ class TerminalRenderer {
         // this.screen.setImage(this.canvas.toBuffer())
 
         this.image = this.ctx.getImageData(0, 0, this.width, this.height);
-        // // B) Convert to ASCII and render
-        // this.screen.setContent(ansi.convert(this.image, this.screen.width, this.screen.height));
 
-        // C) Do Draville something.
-        this.renderDrawille(this.image, this.screen);
+        if (!this.braille) {
+            // B) Convert to ASCII and render
+            this.screen.setContent(ansi.convert(this.image, this.screen.width, this.screen.height));
+        }
+        else {
+            // C) Do Draville something.
+            this.renderDrawille(this.image, this.screen);
+        }
 
         // D) Render to file
 
@@ -74,15 +77,10 @@ class TerminalRenderer {
         const sh = image.height;
         const data = image.data;
 
-        const drawille = this.drawille.canvas;
+        const drawille = this.drawille;
         drawille.width = tw;
         drawille.height = th;
-        const ctx = this.drawille;
-        ctx.width = tw;
-        ctx.height = th;
-
-        // drawille.clear();
-        ctx.clearRect(0, 0, tw, th)
+        drawille.clear();
 
         let tx, ty, p, r, g, b, a, intensity;
         for (let y = 0; y < th; y++) {
@@ -97,9 +95,7 @@ class TerminalRenderer {
                 a = data[p + 3] / 255;
 
                 intensity = (0.2126 * r + 0.7152 * g + 0.0722 * b) * a;
-                // if (intensity < 0.9) drawille.set(x, y);
-                ctx.fillStyle = `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a * 255})`;
-                ctx.fillRect(tx, ty, 1, 1);
+                if (intensity < 0.8) drawille.set(x, y);
             }
         }
 
@@ -108,6 +104,10 @@ class TerminalRenderer {
 
     setAnsiOptions(o) {
         ansi.setOptions(o);
+    }
+
+    setBrailleMode(mode) {
+        this.braille = mode;
     }
 
     saveRenderToFile(canvas, file) {
