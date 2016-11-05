@@ -18,12 +18,10 @@ const { FPSCounter, MemCounter } = require('./counters');
  *
  * TODOs
  *  - backbuffer screen updates based on network latency?
- *  - try rendering to terminal using drawille / braille characters
  *  - make this runs with more examples! (preferably by automating most stuff)
  *  - add docopts to configure parameters (scale, renderers)
- *  - support webgl and software renderers
+ *  - support webgl renderers
  *  - add key controls to adjust parameters inside the terminal (scaling, screenshot, stats, ascii characters)
- *  - try ttystudio
  *  - profit? :D
  *
  * Kinda done-ish
@@ -41,6 +39,9 @@ const { FPSCounter, MemCounter } = require('./counters');
  *    - TerminalRenderer
  *  - add nice fps graphs
  *  - optimize ascii conversion by pulling from canvas data (without png conversion)
+ *  - try ttystudio
+ *  - support SoftwareRenderer with SoftwareCanvas
+ *  - rendering in drawille / braille characters
  *
  * Also see,
  *  https://threejs.org/examples/canvas_ascii_effect.html
@@ -49,7 +50,6 @@ const { FPSCounter, MemCounter } = require('./counters');
  */
 
 let y_scale = 1.23; // pixel ratio of a single terminal character height / width
-let pixel_sampling = 4; // mulitplier of target pixels to actual canvas render size
 width = 100;
 height = y_scale * 50;
 
@@ -260,22 +260,20 @@ setInterval( () => {
 
 	const dataset = [ fpsCounter.fps
 		, memCounter.data
-		, fpsCounter.ms
+		// , fpsCounter.ms
 		];
 
 	// TODO refactor custom sparkline into it's own widget?
 	sparkline.setData(
 		[ 'FPS ' + fpsCounter.currentFps.toFixed(2)
 			, 'Mem ' + memCounter.current.toFixed(2) + 'MB'
-			, 'MS ' + fpsCounter.currentMs.toFixed(2)
+			// , 'MS ' + fpsCounter.currentMs.toFixed(2)
 			],
 		dataset
 	);
 }, 1000);
 
-function setSize(w, h) {
-	width = w * pixel_sampling | 0;
-	height = h * pixel_sampling | 0;
+function setSize(width, height) {
 	// screen.debug('resizing', w, h, screen.width, screen.height);
 	controls.handleResize();
 	camera.aspect = width / height;

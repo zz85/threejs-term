@@ -9,7 +9,11 @@ Sysadmins can now run three.js in remote ssh sessions!
 
 #### Keys
 
-`m` - Toggle Ascii Mode
+`m` - Toggle Ascii Mode (plain -> color blocks -> color + ascii -> ascii colors)
+
+`b` - Braille Mode
+
+`w` - Wireframe Mode
 
 `q`, `Ctrl-C`, `Esc` - Quits app.
 

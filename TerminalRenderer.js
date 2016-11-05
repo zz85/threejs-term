@@ -1,3 +1,5 @@
+'use strict'
+
 const fs = require('fs');
 const Canvas = require('canvas');
 
@@ -16,6 +18,8 @@ const ansi = require('./ansi');
 class TerminalRenderer {
     constructor(screen) {
         this.screen = screen;
+        this.pixel_sampling = 1; // mulitplier of target pixels to actual canvas render size
+
         // Set up fake canvas
         const canvas = new Canvas();
         // const canvas = new SoftwareCanvas();
@@ -38,6 +42,9 @@ class TerminalRenderer {
     setSize(w, h) {
         this.width = w;
         this.height = h;
+        const multiplier = (this.braille ? 4 : 1) * this.pixel_sampling;
+        w = w * multiplier | 0;
+        h = h * multiplier | 0;
         this.renderer.setSize(w, h);
     }
 
@@ -46,7 +53,7 @@ class TerminalRenderer {
     }
 
     render(scene, camera) {
-        // console.error(`Size ${this.width},${this.height} ${this.screen.width},${this.screen.height} `);
+        // console.error(`Size ${this.canvas.width},${this.canvas.height} ${this.screen.width},${this.screen.height} `);
 
         this.renderer.render(scene, camera);
 
@@ -54,7 +61,7 @@ class TerminalRenderer {
         // seems to be faster but less configurable
         // this.screen.setImage(this.canvas.toBuffer())
 
-        this.image = this.ctx.getImageData(0, 0, this.width, this.height);
+        this.image = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
 
         if (!this.braille) {
             // B) Convert to ASCII and render
@@ -108,6 +115,8 @@ class TerminalRenderer {
 
     setBrailleMode(mode) {
         this.braille = mode;
+
+        this.setSize(this.width, this.height);
     }
 
     saveRenderToFile(canvas, file) {
