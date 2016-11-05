@@ -49,7 +49,7 @@ const { FPSCounter, MemCounter } = require('./counters');
  */
 
 let y_scale = 1.23; // pixel ratio of a single terminal character height / width
-let pixel_sampling = 1; // mulitplier of target pixels to actual canvas render size
+let pixel_sampling = 4; // mulitplier of target pixels to actual canvas render size
 width = 100;
 height = y_scale * 50;
 
