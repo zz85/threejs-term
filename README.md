@@ -11,9 +11,13 @@ Sysadmins can now run three.js in remote ssh sessions!
 
 `m` - Toggle Ascii Mode (plain -> color blocks -> color + ascii -> ascii colors)
 
-`b` - Braille Mode
+`b` - Toggle Braille Mode
 
-`w` - Wireframe Mode
+`w` - Toggle Wireframe Mode
+
+`o` / `p` - Decrease / Increase Canvas Render Resolution
+
+`e` - Switch bettwen various geometry objects
 
 `q`, `Ctrl-C`, `Esc` - Quits app.
 
@@ -23,7 +27,7 @@ Sysadmins can now run three.js in remote ssh sessions!
 
 `s` - Camera Scale Mode
 
-`d` - Camera Position Mode 
+`d` - Camera Position Mode
 
 ### Install and Running
 

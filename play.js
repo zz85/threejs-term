@@ -90,17 +90,17 @@ const canvas = blessed.box({ // box image
 });
 
 const box = blessed.box({
-	// parent: screen,
+	parent: screen,
 	top: '0',
 	left: '0',
 	width: 'shrink',
 	height: 'shrink',
-	label: '{bold}Logs{/bold}',
+	// label: '{bold}Logs{/bold}',
 	content: '',
 	tags: true,
-	border: {
-		type: 'line'
-	},
+	// border: {
+	// 	type: 'line'
+	// },
 	style: {
 		fg: 'white',
 		// bg: 'magenta',
@@ -138,6 +138,7 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 mode = 0;
 
 screen.key(['m'], function(ch, key) {
+	log('Toggling ASCII formatting');
 	mode = ++mode % 4;
 	let options = {};
 	switch (mode) {
@@ -162,9 +163,10 @@ screen.key(['m'], function(ch, key) {
 });
 
 braille = false;
-
 screen.key(['b'], function(ch, key) {
 	braille = !braille;
+	log('Braille mode', braille ? 'on' : 'off');
+	toggleWireframe(braille);
 	renderer.setBrailleMode(braille);
 });
 
@@ -172,13 +174,41 @@ pixelScale = 1;
 screen.key(['p'], function(ch, key) {
 	pixelScale *= 2;
 	if (pixelScale > 8) pixelScale = 0.25;
-	// pixelScale = pixelScale == 1 ? 2 :
-	// 	pixelScale == 2 ? 0.5 : 1;
-	// console.error('pixelScale', pixelScale);
+	log('Pixel Scale', pixelScale);
 	renderer.setPixelScale(pixelScale);
 });
 
+screen.key(['o'], function(ch, key) {
+	pixelScale /= 2;
+	if (pixelScale < 0.25) pixelScale = 8;
+	log('Pixel Scale', pixelScale);
+	renderer.setPixelScale(pixelScale);
+});
 
+wireframe = true;
+object_index = 0;
+function toggleVisibility() {
+	objects.forEach(o => { o.visible = false });
+	objects[object_index].visible = true;
+
+	object_index++;
+	object_index %= objects.length;
+}
+
+screen.key(['e'], function(ch, key) {
+	toggleVisibility();
+});
+
+function toggleWireframe (w) {
+	if (w === undefined) wireframe = !wireframe;
+	else wireframe = w;
+	log('Wireframe', wireframe);
+	objects.forEach(o => { o.material.wireframe = wireframe });	
+}
+
+screen.key(['w'], function() {
+	toggleWireframe();
+});
 
 // Focus our element.
 canvas.focus();
@@ -221,6 +251,9 @@ function init() {
 		setSize(width, height);
 	}
 
+	toggleWireframe(true);
+	toggleVisibility();
+
 	window.addEventListener('resize', onResize);
 	onResize();
 }
@@ -253,10 +286,10 @@ function render() {
 const start = Date.now();
 
 function log(...args) {
-	screen.debug(...args);
-	// box.setContent(
-	// 	box.getContent() +
-	// 	args.join('\t') + '\n');
+	// screen.debug(...args);
+	box.setContent(
+		box.getContent() +
+		args.join('\t') + '\n');
 }
 
 function clearlog() {
