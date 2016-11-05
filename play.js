@@ -22,6 +22,8 @@ const { FPSCounter, MemCounter } = require('./counters');
  *  - add docopts to configure parameters (scale, renderers)
  *  - support webgl renderers
  *  - add key controls to adjust parameters inside the terminal (scaling, screenshot, stats, ascii characters)
+ *  - change Canvas dependency to Peer dependency?
+ *  - Add colors to braille mode?
  *  - profit? :D
  *
  * Kinda done-ish

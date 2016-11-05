@@ -14,6 +14,7 @@
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.5.5",
     "canvas": "^1.6.1",
+    "drawille": "^1.1.0",
     "three": "^0.82.1"
   },
   "url": "https://github.com/zz85/threejs-term"
