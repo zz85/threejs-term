@@ -5,7 +5,7 @@ process.env['TERM'] = 'xterm-256color';
 THREE = require('three');
 
 require('three/examples/js/controls/TrackballControls');
-require('./TerminalRenderer');
+require('./TerminalSoftwareRenderer');
 
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');

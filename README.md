@@ -29,6 +29,12 @@ Sysadmins can now run three.js in remote ssh sessions!
 
 `d` - Camera Position Mode
 
+### Updates
+
+Dec 17 2023 - v3.0
+- Getting the original example to run in modern environments, including bunjs
+- Remove node-canvas dependency temporarily, use three-software-renderer
+
 ### Install and Running
 
 If you prefer to run it by git cloning environment, look at the development section.
